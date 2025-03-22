@@ -7,7 +7,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 
-export const Page = () => {
+export const page3 = () => {
   // Education levels data
   const educationLevels = [
     { id: 1, name: "Kindergarten", selected: true },
