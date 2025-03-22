@@ -1,5 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import * as fs from 'node:fs';
+
+
+const fileToGenerativePart = (path: string, mimeType: string) => {
+  return {
+    inlineData: {
+      data: Buffer.from(fs.readFileSync(path)).toString("base64"),
+      mimeType,
+    },
+  };
+}
 
 const generateSystemPrompt = (user_prompt: string) => {
   return `You are an amazing educational childrens story writer. You have been provided with the following prompt from the user "${user_prompt}". Write a minimum 4 page and maximum 8 page page short story using the information from the user prompt. The story must be engaging and educational for children. Each page should be 2-3 sentences and delimited by "<scene>". The story should be suitable for 5-10 year olds.
@@ -44,9 +55,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!apiKey) {
       return res.status(500).json({ message: "Google API key is not defined." });
     }
+
+  const image_desc_prompt = "Describe how this product might be manufactured.";
+  const imagePart = fileToGenerativePart("/path/to/image.png", "image/png");
+
+const result = await model.generateContent([prompt, imagePart]);
+console.log(result.response.text());
     
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: {"temperature" : 1.4},});
     const SYSTEM_PROMPT = generateSystemPrompt(prompt);
 
     const response = await model.generateContent(SYSTEM_PROMPT);
