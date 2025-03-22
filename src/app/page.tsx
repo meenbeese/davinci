@@ -103,9 +103,19 @@ export default function Home() {
             { curr_left_page+1<pages.length ? pages[curr_left_page+1] : "" }
             </div>
           </div>
-          <div className="flex flex-row justify-between">
-            <button className="bg-white text-black h-8 w-8 hover:cursor-pointer" onClick={() => handlePrevPage()}>&lt;</button>
-            <button className="bg-white text-black h-8 w-8 hover:cursor-pointer" onClick={() => handleNextPage()}>&gt;</button>
+          <div className="flex flex-row justify-between gap-4 mt-4">
+            <button
+              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition transform hover:scale-110"
+              onClick={() => handlePrevPage()}
+            >
+            &lt;
+            </button>
+            <button
+              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition transform hover:scale-110"
+              onClick={() => handleNextPage()}
+            >
+            &gt;
+            </button>
           </div>
         </div>
       </main>
