@@ -4,7 +4,7 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Separator } from "../../components/ui/separator";
 
-export const Page = () => {
+export const page2 = () => {
   return (
     <div className="bg-blue-500 flex flex-row justify-center w-full min-h-screen">
       <div className="relative w-[1122px] h-[675px]">
