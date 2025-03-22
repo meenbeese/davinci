@@ -24,9 +24,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="flex justify-between items-center p-4 bg-gray-100 shadow">
+      <header className="flex justify-between items-center p-4 bg-blue-800 text-white shadow-md">
         <h1
-          className="text-xl font-bold cursor-pointer"
+          className="text-xl font-bold cursor-pointer hover:text-blue-200 transition"
           onClick={() => router.push("/")}
         >
           FinLit App
@@ -37,7 +37,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               <p className="text-sm">Welcome, {session.user?.name || "User"}!</p>
               <button
                 onClick={() => signOut()}
-                className="text-sm text-red-500 underline"
+                className="text-sm text-red-300 hover:text-red-100 transition"
               >
                 Log Out
               </button>
@@ -45,7 +45,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           ) : (
             <button
               onClick={() => router.push("/auth")}
-              className="text-sm text-blue-500 underline"
+              className="text-sm text-blue-300 hover:text-blue-100 transition"
             >
               Log In / Sign Up
             </button>
