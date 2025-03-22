@@ -17,9 +17,49 @@ export default function Home() {
   const [curr_left_page, setCurrLeftPage] = React.useState(0);
 
   const [prompt, setPrompt] = React.useState("");
+  const [storyPrompt, setStoryPrompt] = React.useState("");
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const [story, setStory] = React.useState<string | null>(null);
+  const [loadingStory, setLoadingStory] = React.useState(false);
+  const [storyError, setStoryError] = React.useState<string | null>(null);
+
+  const handleGenerateStory = async () => {
+    if (!storyPrompt.trim()) {
+      setStoryError("Please enter a prompt.");
+      return;
+    }
+  
+    setLoadingStory(true);
+    setStoryError(null);
+    setStory(null);
+  
+    try {
+      const response = await fetch("/api/generateStory", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: storyPrompt }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        setStoryError(errorData.message || "Failed to generate story.");
+        return;
+      }
+  
+      const data = await response.json();
+      setStory(data.story);
+    } catch (err) {
+      console.error("Error generating story:", err);
+      setStoryError("An unexpected error occurred.");
+    } finally {
+      setLoadingStory(false);
+    }
+  };
 
   const handleGenerateImage = async () => {
     setLoading(true);
@@ -177,6 +217,32 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        {/* Generate Story Section */}
+          <div className="flex flex-col items-center gap-4 mt-8">
+            <h2 className="text-xl font-bold">Generate Story</h2>
+            <textarea
+              value={storyPrompt}
+              onChange={(e) => setStoryPrompt(e.target.value)}
+              placeholder="Enter a text prompt (e.g., 'Write a short story about a futuristic city.')"
+              className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={4}
+            />
+            <button
+              onClick={handleGenerateStory}
+              disabled={loadingStory || !storyPrompt.trim()}
+              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+            >
+              {loadingStory ? "Generating..." : "Generate Story"}
+            </button>
+            {storyError && <p className="text-red-500">{storyError}</p>}
+            {story && (
+              <div className="mt-4">
+                <h3 className="text-lg font-bold">Generated Story:</h3>
+                <p className="text-gray-700 whitespace-pre-line">{story}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Options Div */}
