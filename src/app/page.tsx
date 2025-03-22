@@ -1,14 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { FiVolume2, FiSettings, FiUploadCloud } from 'react-icons/fi'; // Feather icons
+import { FiVolume2, FiSettings, FiUploadCloud } from "react-icons/fi"; // Feather icons
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
-
-const pages = ["READING TEXT OUTLOUD", "YES I AM ON THE SECOND PAGE", "Page 3", "Page 4"];
-// const curr_left_page = 0;
-// const settingsOrder = ['voice', 'lang', 'rate', 'pitch', 'volume'];
 
 export default function Home() {
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
@@ -23,6 +19,7 @@ export default function Home() {
   const [error, setError] = React.useState<string | null>(null);
 
   const [story, setStory] = React.useState<string | null>(null);
+  const [pages, setPages] = React.useState<string[]>([]);
   const [loadingStory, setLoadingStory] = React.useState(false);
   const [storyError, setStoryError] = React.useState<string | null>(null);
 
@@ -35,6 +32,7 @@ export default function Home() {
     setLoadingStory(true);
     setStoryError(null);
     setStory(null);
+    setPages([]);
   
     try {
       const response = await fetch("/api/generateStory", {
@@ -44,15 +42,19 @@ export default function Home() {
         },
         body: JSON.stringify({ prompt: storyPrompt }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         setStoryError(errorData.message || "Failed to generate story.");
         return;
       }
-  
+
       const data = await response.json();
-      setStory(data.story);
+      const generatedStory = data.story;
+
+      const storyPages = generatedStory.split("\n").filter((page) => page.trim() !== "");
+      setStory(generatedStory);
+      setPages(storyPages);
     } catch (err) {
       console.error("Error generating story:", err);
       setStoryError("An unexpected error occurred.");
@@ -128,23 +130,23 @@ export default function Home() {
       }
       textToSpeech(text, utterance);
     }
-  }
+  };
 
   const handleVoiceSettingsClick = () => {
     setIsSettingsOpen(true);
-  }
+  };
 
   const handlePrevPage = () => {
     if (curr_left_page > 1) {
       setCurrLeftPage(curr_left_page - 2);
     }
-  }
+  };
 
   const handleNextPage = () => {
     if (curr_left_page < pages.length - 2) {
       setCurrLeftPage(curr_left_page + 2);
     }
-  }
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -152,13 +154,11 @@ export default function Home() {
       setSelectedFiles(filesArray);
       console.log("Selected files:", filesArray);
     }
-  }
+  };
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-
       <main className="flex flex-row gap-[32px] row-start-2 items-center sm:items-start">
-
     {/* File Upload Area */}
     <div className="flex flex-col items-center gap-4">
       <label
@@ -235,13 +235,6 @@ export default function Home() {
             >
               {loadingStory ? "Generating..." : "Generate Story"}
             </button>
-            {storyError && <p className="text-red-500">{storyError}</p>}
-            {story && (
-              <div className="mt-4">
-                <h3 className="text-lg font-bold">Generated Story:</h3>
-                <p className="text-gray-700 whitespace-pre-line">{story}</p>
-              </div>
-            )}
           </div>
         </div>
 
