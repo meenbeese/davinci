@@ -57,7 +57,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-grow mt-8">{children}</main>
 
       {/* Footer */}
-      <footer className="p-4 bg-gray-100 text-center">
+      <footer className="p-4 bg-#171717 text-center">
         <p>© 2025 FinLit App. All rights reserved.</p>
       </footer>
     </div>
