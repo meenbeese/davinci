@@ -51,8 +51,11 @@ export default function Home() {
 
       const data = await response.json();
       const generatedStory = data.story;
-
-      const storyPages = generatedStory.split("\n").filter((page) => page.trim() !== "");
+  
+      let storyPages = generatedStory.split("\n").filter((page) => page.trim() !== "");
+  
+      storyPages = mergeShortPages(storyPages);
+  
       setStory(generatedStory);
       setPages(storyPages);
     } catch (err) {
@@ -61,6 +64,33 @@ export default function Home() {
     } finally {
       setLoadingStory(false);
     }
+  };
+
+  const mergeShortPages = (pages: string[], minLength: number = 30): string[] => {
+    const mergedPages: string[] = [];
+  
+    for (let i = 0; i < pages.length; i++) {
+      const currentPage = pages[i];
+  
+      // If the current page is too short
+      if (currentPage.length < minLength) {
+        if (mergedPages.length > 0 && (i === pages.length - 1 || mergedPages[mergedPages.length - 1].length <= pages[i + 1]?.length)) {
+          // Merge with the previous page if it's shorter or if it's the last page
+          mergedPages[mergedPages.length - 1] += " " + currentPage;
+        } else if (i < pages.length - 1) {
+          // Merge with the next page if it exists
+          pages[i + 1] = currentPage + " " + pages[i + 1];
+        } else {
+          // If it's the last page and no previous page exists, just add it
+          mergedPages.push(currentPage);
+        }
+      } else {
+        // Add the current page to the mergedPages array if it's not too short
+        mergedPages.push(currentPage);
+      }
+    }
+  
+    return mergedPages;
   };
 
   const handleGenerateImage = async () => {
@@ -191,7 +221,6 @@ export default function Home() {
           </ul>
         </div>
       )}
-
         {/* Generate Image Section */}
         <div className="flex flex-col items-center gap-4 mt-8">
           <h2 className="text-xl font-bold">Generate AI Image</h2>
@@ -217,7 +246,6 @@ export default function Home() {
             </div>
           )}
         </div>
-
         {/* Generate Story Section */}
           <div className="flex flex-col items-center gap-4 mt-8">
             <h2 className="text-xl font-bold">Generate Story</h2>
@@ -237,7 +265,6 @@ export default function Home() {
             </button>
           </div>
         </div>
-
         {/* Options Div */}
         <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
           <a
@@ -247,7 +274,6 @@ export default function Home() {
           >
             <p className="self-center justify-self-start">Voice</p> <FiVolume2 className="self-center justify-self-end" />
           </a>
-
           <a
             className="flex flex-row rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px] space-x-6 hover:cursor-pointer"
             onClick={() => handleVoiceSettingsClick()}
@@ -256,28 +282,22 @@ export default function Home() {
             <p className="self-center justify-self-start">Settings</p> <FiSettings className="self-center justify-self-end" />
           </a>
         </div>
-
         {/* Book Div */}
         <div className="flex flex-col gap-4 items-center">
           <p className="text-2xl sm:text-3xl font-bold">Book Title</p>
           <p className="text-sm sm:text-base">Author Name</p>
           <div className="flex flex-row gap-4 items-center">
-
             {/* Page 1 */}
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
               <p className="text-sm sm:text-base"> { curr_left_page<pages.length ? `Page ${curr_left_page+1}` : "" } </p>
               { curr_left_page<pages.length ? pages[curr_left_page] : "" }
             </div>
-
-
-
             {/* Page 2 */}
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
             <p className="text-sm sm:text-base"> { curr_left_page+1<pages.length ? `Page ${curr_left_page+2}` : "" } </p>
             { curr_left_page+1<pages.length ? pages[curr_left_page+1] : "" }
             </div>
           </div>
-
           <div className="flex flex-row justify-between gap-4 mt-4">
             <button
               className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition transform hover:scale-110"
@@ -294,7 +314,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      
       {/* Voice Settings Popup */}
       {utterance && (
         <VoiceSettingsPopup 
