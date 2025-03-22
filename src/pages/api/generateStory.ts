@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+<<<<<<< HEAD
 const generateSystemPrompt = (user_prompt: string) => {
   return `You are an amazing educational childrens story writer. You have been provided with the following prompt from the user "${user_prompt}". Write a minimum 4 page and maximum 8 page page short story using the information from the user prompt. The story must be engaging and educational for children. Each page should be 2-3 sentences and delimited by "<scene>". The story should be suitable for 5-10 year olds.
 
@@ -27,6 +28,8 @@ When they finished planting the last seed, they found a note hidden at the botto
 `
 }
 
+=======
+>>>>>>> cb5fc728ae1c9e42ccaafa11ac3412e83d3a44a4
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
