@@ -47,13 +47,11 @@ export default function Home() {
 
   const handleVoiceClick = () => {
     if (utterance) {
+      let text = pages[curr_left_page]
       if (curr_left_page+1<pages.length) {
-        const text = pages[curr_left_page] + " " + pages[curr_left_page+1];
-        textToSpeech(text, utterance);
-      } else {
-        const text = pages[curr_left_page];
-        textToSpeech(text, utterance);
+        text += " " + pages[curr_left_page+1];
       }
+      textToSpeech(text, utterance);
     }
   }
 
