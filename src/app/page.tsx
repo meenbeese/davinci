@@ -20,6 +20,39 @@ export default function Home() {
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [story, setStory] = React.useState<string | null>(null);
+
+
+  const handleGenerateStory = async () => {
+    setLoading(true);
+    setError(null);
+    setStory(null);
+
+    try {
+      const response = await fetch("/api/generateStory", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to generate story.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log(data.story);
+      setStory(data.story);
+    } catch (err) {
+      console.error("Error generating image:", err);
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGenerateImage = async () => {
     setLoading(true);
@@ -163,6 +196,13 @@ export default function Home() {
             rows={4}
           />
           <button
+            onClick={handleGenerateStory}
+            disabled={loading || !prompt}
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+          >
+            {loading ? "Generating..." : "Generate Story"}
+          </button>
+          <button
             onClick={handleGenerateImage}
             disabled={loading || !prompt}
             className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
@@ -208,6 +248,7 @@ export default function Home() {
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
               <p className="text-sm sm:text-base"> { curr_left_page<pages.length ? `Page ${curr_left_page+1}` : "" } </p>
               { curr_left_page<pages.length ? pages[curr_left_page] : "" }
+              {story ? <p>{story}</p> : ""}
             </div>
 
 
