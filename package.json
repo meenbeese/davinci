@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@prisma/client": "^6.5.0",
     "bcrypt": "^5.1.1",
     "next": "15.2.3",

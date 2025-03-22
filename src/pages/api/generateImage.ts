@@ -1,4 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import fs from "fs";
+import path from "path";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -12,37 +15,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Call Google Gemini API for image generation
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini:generateImage", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GOOGLE_API_KEY}`,
+    // Initialize the Google Generative AI client
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+
+    // Configure the model
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-exp",
+      generationConfig: {
+        responseModalities: ["Text", "Image"],
       },
-      body: JSON.stringify({
-        prompt, // Text prompt for image generation
-        n: 1, // Number of images to generate
-        size: "512x512", // Image size (if supported by Gemini)
-      }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      return res.status(response.status).json({ message: error.error.message || "Error from Google Gemini API" });
+    // Generate content
+    const response = await model.generateContent(prompt);
+
+    // Process the response
+    for (const part of response.response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        const imageData = part.inlineData.data;
+        const buffer = Buffer.from(imageData, "base64");
+
+        // Save the image to the public directory
+        const filePath = path.join(process.cwd(), "public", "generated-image.png");
+        fs.writeFileSync(filePath, buffer);
+
+        // Return the correct URL for the image
+        return res.status(200).json({ imageUrl: "/generated-image.png" });
+      }
     }
 
-    const data = await response.json();
-
-    // Assuming the Gemini API returns an array of image URLs
-    const imageUrl = data.images?.[0]?.url || null;
-
-    if (!imageUrl) {
-      return res.status(500).json({ message: "Failed to retrieve image URL from Gemini API response." });
-    }
-
-    return res.status(200).json({ imageUrl });
+    // If no image is found in the response
+    return res.status(500).json({ message: "Failed to generate an image." });
   } catch (error) {
-    console.error("Error generating image:", error);
+    console.error("Error generating content:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 }

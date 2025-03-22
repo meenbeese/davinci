@@ -16,6 +16,41 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [curr_left_page, setCurrLeftPage] = React.useState(0);
 
+  const [prompt, setPrompt] = React.useState("");
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleGenerateImage = async () => {
+    setLoading(true);
+    setError(null);
+    setImageUrl(null);
+
+    try {
+      const response = await fetch("/api/generateImage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to generate image.");
+        return;
+      }
+
+      const data = await response.json();
+      setImageUrl(data.imageUrl);
+    } catch (err) {
+      console.error("Error generating image:", err);
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   React.useEffect(() => {
     const utterance = new SpeechSynthesisUtterance();
     utterance.lang = "en-US";
@@ -84,39 +119,64 @@ export default function Home() {
 
       <main className="flex flex-row gap-[32px] row-start-2 items-center sm:items-start">
 
-        {/* File Upload Area */}
-        <div className="flex flex-col items-center gap-4">
-          <label
-            htmlFor="file-upload"
-            className="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition"
-          >
-            <FiUploadCloud className="text-4xl text-blue-500 mb-2" />
-            <p className="text-lg font-medium text-gray-700">
-              Drag & drop files or{" "}
-              <span className="text-blue-500 underline">Browse</span>
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word, PPT
-            </p>
-          </label>
-          <input
-            id="file-upload"
-            type="file"
-            accept=".jpeg,.png,.gif,.mp4,.pdf,.psd,.ai,.docx,.pptx"
-            multiple
-            className="hidden"
-            onChange={handleFileChange}
+    {/* File Upload Area */}
+    <div className="flex flex-col items-center gap-4">
+      <label
+        htmlFor="file-upload"
+        className="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition"
+      >
+        <FiUploadCloud className="text-4xl text-blue-500 mb-2" />
+        <p className="text-lg font-medium text-gray-700">
+          Drag & drop files or <span className="text-blue-500 underline">Browse</span>
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word, PPT
+        </p>
+      </label>
+      <input
+        id="file-upload"
+        type="file"
+        accept=".jpeg,.png,.gif,.mp4,.pdf,.psd,.ai,.docx,.pptx"
+        multiple
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      {selectedFiles.length > 0 && (
+        <div className="mt-4 text-sm text-gray-600">
+          <p>Selected Files:</p>
+          <ul className="list-disc pl-5">
+            {selectedFiles.map((file, index) => (
+              <li key={index}>{file.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+        {/* Generate Image Section */}
+        <div className="flex flex-col items-center gap-4 mt-8">
+          <h2 className="text-xl font-bold">Generate AI Image</h2>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Enter a text prompt (e.g., 'A futuristic cityscape at sunset')"
+            className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={4}
           />
-          {selectedFiles.length > 0 && (
-            <div className="mt-4 text-sm text-gray-600">
-              <p>Selected Files:</p>
-              <ul className="list-disc pl-5">
-                {selectedFiles.map((file, index) => (
-                  <li key={index}>{file.name}</li>
-                ))}
-              </ul>
+          <button
+            onClick={handleGenerateImage}
+            disabled={loading || !prompt}
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+          >
+            {loading ? "Generating..." : "Generate Image"}
+          </button>
+          {error && <p className="text-red-500">{error}</p>}
+          {imageUrl && (
+            <div className="mt-4">
+              <h3 className="text-lg font-bold">Generated Image:</h3>
+              <img src={imageUrl} alt="Generated by AI" className="mt-2 rounded-lg shadow-lg" />
             </div>
           )}
+        </div>
         </div>
 
         {/* Options Div */}
