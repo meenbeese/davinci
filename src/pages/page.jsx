@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 
-export const Page = () => {
+export const page = () => {
   // Data for the page
   const pageData = {
     logoSrc: "https://c.animaapp.com/m8khb4rqiPdpFQ/img/logo.png",
