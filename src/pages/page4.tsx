@@ -7,7 +7,7 @@ import {
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 
-export const Page = (): JSX.Element => {
+export const page4 = (): JSX.Element => {
   // Data for the page
   const userData = {
     name: "Khusan Akhmedov",
