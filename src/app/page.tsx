@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FiVolume2, FiSettings } from 'react-icons/fi'; // Feather icons
+import { FiVolume2, FiSettings, FiUploadCloud } from 'react-icons/fi'; // Feather icons
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
@@ -11,6 +11,7 @@ const pages = ["READING TEXT OUTLOUD", "YES I AM ON THE SECOND PAGE", "Page 3", 
 // const settingsOrder = ['voice', 'lang', 'rate', 'pitch', 'volume'];
 
 export default function Home() {
+  const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
   const [utterance, setUtterance] = React.useState<SpeechSynthesisUtterance | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [curr_left_page, setCurrLeftPage] = React.useState(0);
@@ -67,10 +68,53 @@ export default function Home() {
     }
   }
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const filesArray = Array.from(event.target.files);
+      setSelectedFiles(filesArray);
+      console.log("Selected files:", filesArray);
+    }
+  }
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
 
       <main className="flex flex-row gap-[32px] row-start-2 items-center sm:items-start">
+
+        {/* File Upload Area */}
+        <div className="flex flex-col items-center gap-4">
+          <label
+            htmlFor="file-upload"
+            className="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition"
+          >
+            <FiUploadCloud className="text-4xl text-blue-500 mb-2" />
+            <p className="text-lg font-medium text-gray-700">
+              Drag & drop files or{" "}
+              <span className="text-blue-500 underline">Browse</span>
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word, PPT
+            </p>
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            accept=".jpeg,.png,.gif,.mp4,.pdf,.psd,.ai,.docx,.pptx"
+            multiple
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          {selectedFiles.length > 0 && (
+            <div className="mt-4 text-sm text-gray-600">
+              <p>Selected Files:</p>
+              <ul className="list-disc pl-5">
+                {selectedFiles.map((file, index) => (
+                  <li key={index}>{file.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
 
         {/* Options Div */}
         <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
