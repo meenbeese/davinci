@@ -6,10 +6,6 @@ import { FiVolume2, FiSettings, FiUploadCloud } from 'react-icons/fi'; // Feathe
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
 
-const pages = ["READING TEXT OUTLOUD", "YES I AM ON THE SECOND PAGE", "Page 3", "Page 4"];
-// const curr_left_page = 0;
-// const settingsOrder = ['voice', 'lang', 'rate', 'pitch', 'volume'];
-
 export default function Home() {
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
   const [utterance, setUtterance] = React.useState<SpeechSynthesisUtterance | null>(null);
@@ -57,44 +53,40 @@ export default function Home() {
     }
   };
 
-  const [story, setStory] = React.useState<string | null>(null);
-  const [loadingStory, setLoadingStory] = React.useState(false);
-  const [storyError, setStoryError] = React.useState<string | null>(null);
-
-  const handleGenerateStory = async () => {
-    if (!storyPrompt.trim()) {
-      setStoryError("Please enter a prompt.");
-      return;
-    }
+  // const handleGenerateStory = async () => {
+  //   if (!storyPrompt.trim()) {
+  //     setStoryError("Please enter a prompt.");
+  //     return;
+  //   }
   
-    setLoadingStory(true);
-    setStoryError(null);
-    setStory(null);
+  //   setLoadingStory(true);
+  //   setStoryError(null);
+  //   setStory(null);
   
-    try {
-      const response = await fetch("/api/generateStory", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt: storyPrompt }),
-      });
+  //   try {
+  //     const response = await fetch("/api/generateStory", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ prompt: storyPrompt }),
+  //     });
   
-      if (!response.ok) {
-        const errorData = await response.json();
-        setStoryError(errorData.message || "Failed to generate story.");
-        return;
-      }
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       setStoryError(errorData.message || "Failed to generate story.");
+  //       return;
+  //     }
   
-      const data = await response.json();
-      setStory(data.story);
-    } catch (err) {
-      console.error("Error generating story:", err);
-      setStoryError("An unexpected error occurred.");
-    } finally {
-      setLoadingStory(false);
-    }
-  };
+  //     const data = await response.json();
+  //     setStory(data.story);
+  //   } catch (err) {
+  //     console.error("Error generating story:", err);
+  //     setStoryError("An unexpected error occurred.");
+  //   } finally {
+  //     setLoadingStory(false);
+  //   }
+  // };
 
   const handleGenerateImage = async () => {
     setLoading(true);
@@ -260,7 +252,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* Generate Story Section */}
+        {/* Generate Story Section
           <div className="flex flex-col items-center gap-4 mt-8">
             <h2 className="text-xl font-bold">Generate Story</h2>
             <textarea
@@ -284,7 +276,7 @@ export default function Home() {
                 <p className="text-gray-700 whitespace-pre-line">{story}</p>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* Options Div */}
