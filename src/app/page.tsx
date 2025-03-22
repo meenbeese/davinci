@@ -18,45 +18,13 @@ export default function Home() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [story, setStory] = React.useState<string | null>(null);
-  const [pages, setPages] = React.useState<string[]>([]);
-  const [characters, setCharacters] = React.useState<string[]>([]); // [0] = characters in scene 0, [1] = characters in scene 1, etc.
-  const [title, setTitle] = React.useState<string | null>(null);
-
-
-  const extractKeyFeatures = async (story: string) => {
-    setStory(null);
-
-    try {
-      const response = await fetch("/api/extractKeyFeatures", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ story }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to extract features.");
-        return;
-      }
-
-      const data = await response.json();
-      console.log(data.characters, data.title);
-      setCharacters(data.characters);
-      setTitle(data.title);
-    } catch (err) {
-      console.error("Error extracting features:", err);
-      setError("An unexpected error occurred.");
-    }
-  };
-
+  const [pages, setPages] = React.useState<{ content: string; imageUrl: string | null }[]>([]);
 
   const handleGenerateStory = async () => {
     setLoading(true);
     setError(null);
     setStory(null);
-
+  
     try {
       const response = await fetch("/api/generateStory", {
         method: "POST",
@@ -65,20 +33,56 @@ export default function Home() {
         },
         body: JSON.stringify({ prompt }),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.message || "Failed to generate story.");
         return;
       }
-
+  
       const data = await response.json();
       console.log(data.story);
       setStory(data.story);
-      setPages(data.story.split("<scene>"));
-      extractKeyFeatures(data.story);
+  
+      // Split the story into pages
+      const storyPages = data.story.split("<scene>").filter((page) => page.trim() !== "");
+  
+      // Generate images for each page
+      const imagePromises = storyPages.map(async (pageContent, index) => {
+        try {
+          const imageResponse = await fetch("/api/generateImage", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prompt: pageContent }),
+          });
+  
+          if (!imageResponse.ok) {
+            console.error(`Failed to generate image for page ${index + 1}`);
+            return null;
+          }
+  
+          const imageData = await imageResponse.json();
+          return imageData.imageUrl;
+        } catch (err) {
+          console.error(`Error generating image for page ${index + 1}:`, err);
+          return null;
+        }
+      });
+  
+      // Wait for all image generation to complete
+      const images = await Promise.all(imagePromises);
+  
+      // Combine pages with their respective images
+      const pagesWithImages = storyPages.map((content, index) => ({
+        content,
+        imageUrl: images[index] || null,
+      }));
+  
+      setPages(pagesWithImages);
     } catch (err) {
-      console.error("Error generating image:", err);
+      console.error("Error generating story:", err);
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
@@ -332,22 +336,38 @@ export default function Home() {
 
         {/* Book Div */}
         <div className="flex flex-col gap-4 items-center">
-          <p className="text-2xl sm:text-3xl font-bold">{title}</p>
-          <p className="text-sm sm:text-base">Author: Gemini</p>
+          <p className="text-2xl sm:text-3xl font-bold">Book Title</p>
+          <p className="text-sm sm:text-base">Author Name</p>
           <div className="flex flex-row gap-4 items-center">
 
             {/* Page 1 */}
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
-              <p className="text-sm sm:text-base"> { curr_left_page<pages.length ? `Page ${curr_left_page+1}` : "" } </p>
-              { curr_left_page<pages.length ? pages[curr_left_page] : "" }
+              <p className="text-sm sm:text-base">
+                {curr_left_page < pages.length ? `Page ${curr_left_page + 1}` : ""}
+              </p>
+              {curr_left_page < pages.length ? pages[curr_left_page].content : ""}
+              {curr_left_page < pages.length && pages[curr_left_page].imageUrl && (
+                <img
+                  src={pages[curr_left_page].imageUrl}
+                  alt={`Page ${curr_left_page + 1} Illustration`}
+                  className="mt-4 rounded-lg shadow-lg"
+                />
+              )}
             </div>
-
-
 
             {/* Page 2 */}
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
-              <p className="text-sm sm:text-base"> { curr_left_page+1<pages.length ? `Page ${curr_left_page+2}` : "" } </p>
-              { curr_left_page+1<pages.length ? pages[curr_left_page+1] : "" }
+              <p className="text-sm sm:text-base">
+                {curr_left_page + 1 < pages.length ? `Page ${curr_left_page + 2}` : ""}
+              </p>
+              {curr_left_page + 1 < pages.length ? pages[curr_left_page + 1].content : ""}
+              {curr_left_page + 1 < pages.length && pages[curr_left_page + 1].imageUrl && (
+                <img
+                  src={pages[curr_left_page + 1].imageUrl}
+                  alt={`Page ${curr_left_page + 2} Illustration`}
+                  className="mt-4 rounded-lg shadow-lg"
+                />
+              )}
             </div>
           </div>
 
