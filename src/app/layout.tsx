@@ -24,9 +24,9 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="flex justify-between items-center p-4 bg-blue-800 text-white shadow-md">
+      <header className="sticky top-4 mx-4 bg-blue-800 text-white shadow-lg rounded-lg p-6 flex justify-between items-center z-50">
         <h1
-          className="text-xl font-bold cursor-pointer hover:text-blue-200 transition"
+          className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition"
           onClick={() => router.push("/")}
         >
           FinLit App
@@ -54,7 +54,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow">{children}</main>
+      <main className="flex-grow mt-8">{children}</main>
 
       {/* Footer */}
       <footer className="p-4 bg-gray-100 text-center">
