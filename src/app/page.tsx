@@ -5,6 +5,7 @@ import { FiVolume2, FiSettings, FiUploadCloud } from 'react-icons/fi'; // Feathe
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
+import generateImage from "./image_generation.ts";
 
 const pages = ["READING TEXT OUTLOUD", "YES I AM ON THE SECOND PAGE", "Page 3", "Page 4"];
 // const curr_left_page = 0;
@@ -79,6 +80,11 @@ export default function Home() {
     }
   }
 
+  const handleGeneration = () => {
+    generateImage();
+
+  }
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
 
@@ -136,6 +142,14 @@ export default function Home() {
           >
             <p className="self-center justify-self-start">Settings</p> <FiSettings className="self-center justify-self-end" />
           </a>
+
+          <a
+            className="flex flex-row rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px] space-x-6 hover:cursor-pointer"
+            onClick={() => handleGeneration()}
+            rel="noopener noreferrer"
+          >
+            <p className="self-center justify-self-start">GEN IMAGE TEST</p>
+          </a>
         </div>
 
         {/* Book Div */}
@@ -147,6 +161,7 @@ export default function Home() {
             {/* Page 1 */}
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
               <p className="text-sm sm:text-base"> { curr_left_page<pages.length ? `Page ${curr_left_page+1}` : "" } </p>
+              <p id='left-page-picture' className="text-sm sm:text-base">Left Page Picture</p>
               { curr_left_page<pages.length ? pages[curr_left_page] : "" }
             </div>
 
