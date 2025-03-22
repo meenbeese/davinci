@@ -50,12 +50,14 @@ export default function Home() {
       // Generate images for each page
       const imagePromises = storyPages.map(async (pageContent, index) => {
         try {
+          const imagePrompt = `Create a very symbolic and abstract representation suitable for kids for the following story page: ${pageContent}`;
+  
           const imageResponse = await fetch("/api/generateImage", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ prompt: pageContent }),
+            body: JSON.stringify({ prompt: imagePrompt }),
           });
   
           if (!imageResponse.ok) {
