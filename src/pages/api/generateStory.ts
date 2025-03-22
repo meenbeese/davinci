@@ -18,8 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Configure the model
     const generationConfig = {
-      stopSequences: ["red"], // Example stop sequence
-      maxOutputTokens: 1000, // Adjust for longer stories
+      maxOutputTokens: 2500, // Works for now
       temperature: 0.7,
       topP: 0.6,
       topK: 16,
