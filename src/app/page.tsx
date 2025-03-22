@@ -21,6 +21,7 @@ export default function Home() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [story, setStory] = React.useState<string | null>(null);
+  const [pages, setPages] = React.useState<string[]>([]);
 
 
   const handleGenerateStory = async () => {
@@ -46,6 +47,7 @@ export default function Home() {
       const data = await response.json();
       console.log(data.story);
       setStory(data.story);
+      setPages(data.story.split("<scene>"));
     } catch (err) {
       console.error("Error generating image:", err);
       setError("An unexpected error occurred.");
@@ -248,7 +250,6 @@ export default function Home() {
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
               <p className="text-sm sm:text-base"> { curr_left_page<pages.length ? `Page ${curr_left_page+1}` : "" } </p>
               { curr_left_page<pages.length ? pages[curr_left_page] : "" }
-              {story ? <p>{story}</p> : ""}
             </div>
 
 
