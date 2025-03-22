@@ -24,6 +24,9 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setStory(null);
+    setPages([]); // Clear previous pages
+  
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   
     try {
       const response = await fetch("/api/generateStory", {
@@ -45,10 +48,16 @@ export default function Home() {
       setStory(data.story);
   
       // Split the story into pages
-      const storyPages = data.story.split("<scene>").filter((page: string) => page.trim() !== "");
+      const storyPages = data.story.split("<scene>").filter((page) => page.trim() !== "");
   
-      // Generate images for each page
-      const imagePromises = storyPages.map(async (pageContent: string, index: number) => {
+      // Initialize pages with content and null images
+      const initialPages = storyPages.map((content) => ({ content, imageUrl: null }));
+      setPages(initialPages);
+  
+      // Generate images for each page with a delay
+      for (let index = 0; index < storyPages.length; index++) {
+        const pageContent = storyPages[index];
+  
         try {
           // Step 1: Summarize the page content
           const summaryResponse = await fetch("/api/summarizePage", {
@@ -61,7 +70,7 @@ export default function Home() {
   
           if (!summaryResponse.ok) {
             console.error(`Failed to summarize page ${index + 1}`);
-            return null;
+            continue;
           }
   
           const summaryData = await summaryResponse.json();
@@ -79,27 +88,24 @@ export default function Home() {
   
           if (!imageResponse.ok) {
             console.error(`Failed to generate image for page ${index + 1}`);
-            return null;
+            continue;
           }
   
           const imageData = await imageResponse.json();
-          return imageData.imageUrl;
+  
+          // Update the page with the generated image
+          setPages((prevPages) =>
+            prevPages.map((page, i) =>
+              i === index ? { ...page, imageUrl: imageData.imageUrl } : page
+            )
+          );
         } catch (err) {
           console.error(`Error generating image for page ${index + 1}:`, err);
-          return null;
         }
-      });
   
-      // Wait for all image generation to complete
-      const images = await Promise.all(imagePromises);
-  
-      // Combine pages with their respective images
-      const pagesWithImages = storyPages.map((content, index) => ({
-        content,
-        imageUrl: images[index] || null,
-      }));
-  
-      setPages(pagesWithImages);
+        // Add a delay before the next request
+        await delay(500); // 500ms delay
+      }
     } catch (err) {
       console.error("Error generating story:", err);
       setError("An unexpected error occurred.");
