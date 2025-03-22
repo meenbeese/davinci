@@ -26,12 +26,15 @@ export default function VoiceSettingsPopup({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Voice Settings</h2>
-        <div className="flex flex-col gap-4">
-          <label className="flex flex-col">
-            <span>Rate</span>
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">
+          Voice Settings
+        </h2>
+        <div className="flex flex-col gap-6">
+          {/* Rate Slider */}
+          <div className="flex flex-col gap-2">
+            <label className="text-white font-medium">Rate</label>
             <input
               type="range"
               min="0.5"
@@ -39,10 +42,13 @@ export default function VoiceSettingsPopup({
               step="0.1"
               defaultValue={utterance.rate}
               onChange={handleRateChange}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
-          </label>
-          <label className="flex flex-col">
-            <span>Pitch</span>
+          </div>
+
+          {/* Pitch Slider */}
+          <div className="flex flex-col gap-2">
+            <label className="text-white font-medium">Pitch</label>
             <input
               type="range"
               min="0"
@@ -50,10 +56,13 @@ export default function VoiceSettingsPopup({
               step="0.1"
               defaultValue={utterance.pitch}
               onChange={handlePitchChange}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
-          </label>
-          <label className="flex flex-col">
-            <span>Volume</span>
+          </div>
+
+          {/* Volume Slider */}
+          <div className="flex flex-col gap-2">
+            <label className="text-white font-medium">Volume</label>
             <input
               type="range"
               min="0"
@@ -61,12 +70,15 @@ export default function VoiceSettingsPopup({
               step="0.1"
               defaultValue={utterance.volume}
               onChange={handleVolumeChange}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
-          </label>
+          </div>
         </div>
+
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+          className="mt-6 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
         >
           Close
         </button>
