@@ -5,7 +5,7 @@ import { textToSpeech } from "./text_to_speech";
 import * as React from "react";
 
 const pages = ["READING TEXT OUTLOUD", "YES I AM ON THE SECOND PAGE"];
-const curr_page = 0;
+const curr_left_page = 0;
 
 // Create a new SpeechSynthesisUtterance object
 // function SpeechComponent() {
@@ -36,25 +36,26 @@ const curr_page = 0;
 
 
 export default function Home() {
-  const [msg, setMsg] = React.useState<SpeechSynthesisUtterance | null>(null);
+  const [utterance, setUtterance] = React.useState<SpeechSynthesisUtterance | null>(null);
 
   React.useEffect(() => {
-    const msg = new SpeechSynthesisUtterance();
-    msg.lang = "en-US";
-    msg.rate = 0.25;
-    msg.pitch = 1.0;
-    msg.volume = 1.0;
+    const utterance = new SpeechSynthesisUtterance();
+    utterance.lang = "en-US";
+    utterance.rate = 0.25;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
     const voices = window.speechSynthesis.getVoices();
     const englishVoice = voices.find(voice => voice.lang.includes('en-'));
     if (englishVoice) {
-        msg.voice = englishVoice;
+        utterance.voice = englishVoice;
     }
-    setMsg(msg);
+    setUtterance(utterance);
   }, []);
 
   const handleVoiceClick = () => {
-    if (msg) {
-      textToSpeech(pages, curr_page, msg);
+    if (utterance) {
+      const text = pages[curr_left_page] + " " + pages[curr_left_page+1];
+      textToSpeech(text, utterance);
     }
   }
 
