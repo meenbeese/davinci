@@ -104,7 +104,7 @@ export default function Home() {
         }
   
         // Add a delay before the next request
-        await delay(500); // 500ms delay
+        await delay(100); // 100ms delay
       }
     } catch (err) {
       console.error("Error generating story:", err);
