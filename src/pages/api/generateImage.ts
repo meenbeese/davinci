@@ -30,7 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash-exp-image-generation",
-    generationConfig: {},
+    generationConfig: {
+      // @ts-expect-error: 'responseModalities' is not part of the type definition, but we need it
+      responseModalities: ['Text', 'Image']
+    },
   });
 
   const images = []
