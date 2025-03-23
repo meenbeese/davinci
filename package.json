@@ -12,6 +12,7 @@
     "@google/generative-ai": "^0.24.0",
     "@prisma/client": "^6.5.0",
     "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
     "formidable": "^3.5.2",
     "next": "15.2.3",
     "next-auth": "^4.24.11",

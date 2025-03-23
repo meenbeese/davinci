@@ -173,11 +173,33 @@ export default function Home() {
     }
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
       setSelectedFiles(filesArray);
       console.log("Selected files:", filesArray);
+
+      const formData = new FormData();
+      filesArray.forEach(file => {
+        formData.append('file', file);
+      });
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Upload error:', errorData);
+        } else {
+          const data = await response.json();
+          console.log('Upload success:', data);
+        }
+      } catch (err) {
+        console.error('Error uploading files:', err);
+      }
     }
   }
 
