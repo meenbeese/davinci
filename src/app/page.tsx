@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
+import LoadingOverlay from "./LoadingOverlay"; // Import the new component
 
 export default function Home() {
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
@@ -202,6 +203,9 @@ export default function Home() {
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] items-start justify-items-center min-h-screen py-4 gap-4 sm:p-4 font-[family-name:var(--font-geist-sans)]">
+      {/* Show loading overlay when loading is true */}
+      {loading && <LoadingOverlay />}
+      
       <main className="flex flex-row gap-[32px] items-center sm:items-start">
         <div className="flex flex-col items-center gap-6">
           <h2 className="text-2xl sm:text-3xl font-bold mb-2">
