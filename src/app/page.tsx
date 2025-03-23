@@ -19,6 +19,37 @@ export default function Home() {
   const [error, setError] = React.useState<string | null>(null);
   const [story, setStory] = React.useState<string | null>(null);
   const [pages, setPages] = React.useState<string[]>([]);
+  const [characters, setCharacters] = React.useState<string[]>([]); // [0] = characters in scene 0, [1] = characters in scene 1, etc.
+  const [title, setTitle] = React.useState<string | null>(null);
+
+
+  const extractKeyFeatures = async (story: string) => {
+    setStory(null);
+
+    try {
+      const response = await fetch("/api/extractKeyFeatures", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ story }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to extract features.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log(data.characters, data.title);
+      setCharacters(data.characters);
+      setTitle(data.title);
+    } catch (err) {
+      console.error("Error extracting features:", err);
+      setError("An unexpected error occurred.");
+    }
+  };
 
 
   const handleGenerateStory = async () => {
@@ -45,6 +76,7 @@ export default function Home() {
       console.log(data.story);
       setStory(data.story);
       setPages(data.story.split("<scene>"));
+      extractKeyFeatures(data.story);
     } catch (err) {
       console.error("Error generating image:", err);
       setError("An unexpected error occurred.");
@@ -300,8 +332,8 @@ export default function Home() {
 
         {/* Book Div */}
         <div className="flex flex-col gap-4 items-center">
-          <p className="text-2xl sm:text-3xl font-bold">Book Title</p>
-          <p className="text-sm sm:text-base">Author Name</p>
+          <p className="text-2xl sm:text-3xl font-bold">{title}</p>
+          <p className="text-sm sm:text-base">Author: Gemini</p>
           <div className="flex flex-row gap-4 items-center">
 
             {/* Page 1 */}
@@ -314,8 +346,8 @@ export default function Home() {
 
             {/* Page 2 */}
             <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
-            <p className="text-sm sm:text-base"> { curr_left_page+1<pages.length ? `Page ${curr_left_page+2}` : "" } </p>
-            { curr_left_page+1<pages.length ? pages[curr_left_page+1] : "" }
+              <p className="text-sm sm:text-base"> { curr_left_page+1<pages.length ? `Page ${curr_left_page+2}` : "" } </p>
+              { curr_left_page+1<pages.length ? pages[curr_left_page+1] : "" }
             </div>
           </div>
 
