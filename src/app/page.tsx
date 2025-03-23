@@ -3,6 +3,7 @@
 import * as React from "react";
 import { FiVolume2, FiSettings, FiUploadCloud } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
+import { useSearchParams } from 'next/navigation';
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
@@ -24,6 +25,79 @@ export default function Home() {
 
   const [imagesLoading, setImagesLoading] = React.useState<boolean[]>([]);
   const [cardsLoading, setCardsLoading] = React.useState(false);
+
+  const [eduLevel, setEduLevel] = React.useState<Category | null>(null);
+  const [learningCategories, setLearningCategories] = React.useState<Category[]>([]);
+
+  const allLearningCategories = [
+    { id: 1, name: "Art"},
+    { id: 2, name: "Business"},
+    { id: 3, name: "English"},
+    { id: 4, name: "French"},
+    { id: 5, name: "Math"},
+    { id: 6, name: "Music"},
+    { id: 7, name: "Science"},
+    { id: 8, name: "Social Sciences",}
+  ];
+  const allEduLevels = [
+    { id: 1, name: "Kindergarten"},
+    { id: 2, name: "Elementary"},
+    { id: 3, name: "Middle"},
+    { id: 4, name: "High"},
+  ];
+
+  const searchParams = useSearchParams();
+
+  React.useEffect(() => {
+    // Parse education levels
+    const educationLevelBinary = searchParams ? searchParams.get('education_level') : null;
+    if (educationLevelBinary) {
+      const selectedLevels = Array.from(educationLevelBinary)
+        .map((bit, index) => bit === '1' ? allEduLevels[index] : null)
+        .filter(level => level !== null);
+      
+      setEduLevel(selectedLevels);
+    }
+    
+    // Parse learning categories
+    const categoriesBinary = searchParams ? searchParams.get('learning_categories') : null;
+    if (categoriesBinary) {
+      const selectedCats = Array.from(categoriesBinary)
+        .map((bit, index) => bit === '1' ? allLearningCategories[index] : null)
+        .filter(category => category !== null);
+      
+      setLearningCategories(selectedCats);
+    }
+  }, [searchParams]); // Only run when searchParams changes
+
+  // interface Category {
+  //   id: number;
+  //   name: string;
+  // }
+
+  // function binaryStringToCategoryIds(binaryString: string | null): number[] {
+  //   if (!binaryString) return [];
+    
+  //   return Array.from(binaryString)
+  //     .map((bit, index) => bit === '1' ? index : null)
+  //     .filter((id): id is number => id !== null);
+  // }
+  // interface Category {
+  //   id: number;
+  //   name: string;
+  // }
+
+  // function binaryStringToCategories(binaryString: string | null, categoriesArray: Category[]): Category[] {
+  //   if (!binaryString || !categoriesArray) return [];
+    
+  //   const selectedIds = binaryStringToCategoryIds(binaryString);
+    
+  //   return categoriesArray.filter(category => 
+  //     selectedIds.includes(category.id - 1)
+  //   );
+  // }
+  // setLearningCategories(binaryStringToCategories(learnBin, allLearningCategories));
+  // setEduLevel(binaryStringToCategories(eduBin, allEduLevels)[0]);
 
   const extractKeyFeatures = async (story: string) => {
     try {
@@ -56,13 +130,17 @@ export default function Home() {
     setPages([]); // Clear previous pages
     setAllImageUrls([]); // Clear previous image URLs
 
+    console.log("Prompt:", prompt);
+    console.log("Education Level:", eduLevel);
+    console.log("Learning Categories:", learningCategories);
+
     try {
       const response = await fetch("/api/generateStory", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, eduLevel, learningCategories }),
       });
 
       if (!response.ok) {

@@ -16,6 +16,10 @@ export default function Page3() {
   const [error, setError] = useState("");
   const router = useRouter();
   const { username, email, password } = router.query
+
+  const convertToBinaryString = (items) => {
+    return items.map(item => item.selected ? '1' : '0').join('');
+  };
   
   const handleSubmit = async () => {
     // Handle sign-in
@@ -26,7 +30,9 @@ export default function Page3() {
     });
 
     if (res?.ok) {
-      router.push("/"); // Redirect to home page after successful login
+      const educationLevelsBinary = convertToBinaryString(educationLevels);
+      const learningCategoriesBinary = convertToBinaryString(learningCategories);
+      router.push({pathname: "/", query: {education_level : educationLevelsBinary, learning_categories : learningCategoriesBinary}}); // Redirect to home page after successful login
     } else {
       setError("Invalid email or password");
     }

@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const generateSystemPrompt = (user_prompt: string) => {
-  return `You are a world renowned educational childrens book story writer. You have been provided with the following prompt from the user "${user_prompt}". Write a childrens short story using the information from the user prompt. There should be clear main characters and a clear storyline. The character descriptions should be VERY descriptive and should explicitly show many attributes of the character. The story MUST be a MINIMUM of 4 pages and a MAXIMUM of 6 pages. The story must be engaging and educational for children. Each page should be 2-3 sentences and delimited by "<scene>". The story MUST be suitable for 5-10 year olds. Do not use any profanity or inappropriate content in the story. Do NOT respond with anything except story content and the scene delimiters. You must stay below 6 scenes. You must stay below 6 pages. Do NOT go above 35 words per page. Do NOT go above 35 words per scene.
+const generateSystemPrompt = (user_prompt: string, edu_level, learning_categories) => {
+  return `You are a world renowned educational childrens book story writer. You have been provided with the following prompt from the user "${user_prompt}". The user has a ${edu_level} education. The user is interested in learning about ${learning_categories.join(", ")}. Write a childrens short story using the information given and the user prompt. There should be clear main characters and a clear storyline. The character descriptions should be VERY descriptive and should explicitly show many attributes of the character. The story MUST be a MINIMUM of 4 pages and a MAXIMUM of 6 pages. The story must be engaging and educational for children. Each page should be 2-3 sentences and delimited by "<scene>". The story MUST be suitable for 5-10 year olds. Do not use any profanity or inappropriate content in the story. Do NOT respond with anything except story content and the scene delimiters. You must stay below 6 scenes. You must stay below 6 pages. Do NOT go above 35 words per page. Do NOT go above 35 words per scene.
 
   Example input: "A cat and an owl go on a treasure hunt"
 
@@ -16,7 +16,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { prompt } = req.body;
+  let { prompt, edu_level, learning_categories } = req.body;
+
+  if (!edu_level || typeof edu_level !== "string") {
+    edu_level = "";
+  }
+  if (!learning_categories || !Array.isArray(learning_categories)) {
+    learning_categories = [""];
+  }
 
   if (!prompt || typeof prompt !== "string") {
     return res.status(400).json({ message: "Prompt is required and must be a string." });
@@ -31,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const SYSTEM_PROMPT = generateSystemPrompt(prompt);
+    const SYSTEM_PROMPT = generateSystemPrompt(prompt, edu_level, learning_categories);
     const response = await model.generateContent(SYSTEM_PROMPT);
     
     if (response.response) {
