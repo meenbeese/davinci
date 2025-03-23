@@ -29,7 +29,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition"
           onClick={() => router.push("/")}
         >
-          FinLit App
+          DaVinci
         </h1>
         <div className="flex items-center gap-4">
           {session ? (
@@ -58,7 +58,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Footer */}
       <footer className="p-4 bg-#171717 text-center">
-        <p>© 2025 FinLit App. All rights reserved.</p>
+        <p>© 2025 DaVinci. All rights reserved.</p>
       </footer>
     </div>
   );

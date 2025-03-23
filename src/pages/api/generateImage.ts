@@ -20,6 +20,40 @@ const generateSystemPrompt = (scene: string, art_style: string, education_topic:
   return SYSTEM_PROMPT;
 }
 
+// Function to clean up old images
+const cleanupOldImages = () => {
+  const publicDir = path.join(process.cwd(), "public");
+  const now = Date.now();
+
+  try {
+    const files = fs.readdirSync(publicDir);
+    
+    files.forEach(file => {
+      if (file.startsWith('generated-image-')) {
+        const filePath = path.join(publicDir, file);
+        const stats = fs.statSync(filePath);
+        
+        // Check if file is older than IMAGE_MAX_AGE
+        if (now - stats.mtimeMs > IMAGE_MAX_AGE) {
+          try {
+            fs.unlinkSync(filePath);
+            console.log(`Deleted old image: ${file}`);
+          } catch (err) {
+            console.error(`Error deleting file ${file}:`, err);
+          }
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Error during cleanup:', err);
+  }
+};
+
+// Start periodic cleanup
+if (typeof setInterval !== 'undefined') {
+  setInterval(cleanupOldImages, CLEANUP_INTERVAL);
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
