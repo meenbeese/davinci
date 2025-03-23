@@ -3,7 +3,6 @@
 import * as React from "react";
 import { FiVolume2, FiSettings, FiUploadCloud } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
-import Link from "next/link";
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
@@ -58,7 +57,7 @@ export default function Home() {
     setError(null);
     setPages([]); // Clear previous pages
     setAllImageUrls([]); // Clear previous image URLs
-  
+
     try {
       const response = await fetch("/api/generateStory", {
         method: "POST",
@@ -75,7 +74,7 @@ export default function Home() {
       }
 
       const story_response = await response.json();
-  
+
       // Split the story into pages
       const storyPages = story_response.story.split("<scene>");
       setPages(storyPages);
@@ -86,12 +85,18 @@ export default function Home() {
       console.log(key_features.characters);
 
       const imageResponse = await fetch("/api/generateImage", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ scenes: storyPages, art_style: "minimalist, watercolor", education_topic: "history", lang: "English", story_characters: key_features.characters }),
-            });
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scenes: storyPages,
+          art_style: "minimalist, watercolor",
+          education_topic: "history",
+          lang: "English",
+          story_characters: key_features.characters,
+        }),
+      });
 
       if (!imageResponse.ok) {
         console.error(`Failed to generate images`);
@@ -101,7 +106,6 @@ export default function Home() {
       const imageData = await imageResponse.json();
       setAllImageUrls(imageData.images);
       setImagesLoading(new Array(storyPages.length).fill(false));
-
     } catch (err) {
       console.error("Error generating story:", err);
       setError("An unexpected error occurred.");
@@ -190,8 +194,8 @@ export default function Home() {
           console.error("Upload error:", errorData);
         } else {
           const data = await response.json();
-          console.log('Upload success:', data);
-          
+          console.log("Upload success:", data);
+
           // Update the prompt state to the description received from the server
           setPrompt(data.description); // Use the description from the response
         }
@@ -205,7 +209,7 @@ export default function Home() {
     <div className="grid grid-rows-[auto_1fr_auto] items-start justify-items-center min-h-screen py-4 gap-4 sm:p-4 font-[family-name:var(--font-geist-sans)]">
       {/* Show loading overlay when loading is true */}
       {loading && <LoadingOverlay />}
-      
+
       <main className="flex flex-row gap-[32px] items-center sm:items-start">
         <div className="flex flex-col items-center gap-6">
           <h2 className="text-2xl sm:text-3xl font-bold mb-2">
@@ -246,58 +250,37 @@ export default function Home() {
               </p>
             </div>
 
-        {/* Generate Image Section */}
-        <div className="flex flex-col items-center gap-4 mt-2">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter a text prompt (e.g., 'A futuristic cityscape at sunset')"
-            className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={4}
-          />
+            {/* Generate Image Section */}
+            <div className="flex flex-col items-center gap-4 mt-2">
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Enter a text prompt (e.g., 'A futuristic cityscape at sunset')"
+                className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
+              />
 
-            <button
-              onClick={handleGenerateStory}
-              disabled={loading || !prompt}
-              className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <span>{loading ? "Generating..." : "Generate Story"}</span>
-              <HiSparkles className="w-5 h-5" />
-            </button>
-          </div>
-
-          {selectedFiles.length > 0 && (
-            <div className="text-sm text-gray-600">
-              <p>Selected Files:</p>
-              <ul className="list-disc pl-5">
-                {selectedFiles.map((file, index) => (
-                  <li key={index}>{file.name}</li>
-                ))}
-              </ul>
+              <button
+                onClick={handleGenerateStory}
+                disabled={loading || !prompt}
+                className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <span>{loading ? "Generating..." : "Generate Story"}</span>
+                <HiSparkles className="w-5 h-5" />
+              </button>
             </div>
-          )}
-        </div>
-      </div>
 
-        {/* Options Div */}
-        <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
-          <a
-            className="flex flex-row rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px] space-x-8 hover:cursor-pointer"
-            onClick={() => handleVoiceClick()}
-            rel="noopener noreferrer"
-          >
-            <p className="self-center justify-self-start">Voice</p>{" "}
-            <FiVolume2 className="self-center justify-self-end" />
-          </a>
-
-          <a
-            className="flex flex-row rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px] space-x-6 hover:cursor-pointer"
-            onClick={() => handleVoiceSettingsClick()}
-            rel="noopener noreferrer"
-          >
-            <p className="self-center justify-self-start">Settings</p>{" "}
-            <FiSettings className="self-center justify-self-end" />
-          </a>
+            {selectedFiles.length > 0 && (
+              <div className="text-sm text-gray-600">
+                <p>Selected Files:</p>
+                <ul className="list-disc pl-5">
+                  {selectedFiles.map((file, index) => (
+                    <li key={index}>{file.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Book Div */}
@@ -336,8 +319,18 @@ export default function Home() {
                       {allImageUrls[index] ? (
                         imagesLoading[index] ? (
                           <div className="w-full h-full rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
-                            <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <svg
+                              className="w-10 h-10 text-gray-300"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
                             </svg>
                           </div>
                         ) : (
@@ -376,6 +369,27 @@ export default function Home() {
               &gt;
             </button>
           </div>
+        </div>
+
+        {/* Options Div */}
+        <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
+          <a
+            className="flex flex-row rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px] space-x-8 hover:cursor-pointer"
+            onClick={() => handleVoiceClick()}
+            rel="noopener noreferrer"
+          >
+            <p className="self-center justify-self-start">Voice</p>{" "}
+            <FiVolume2 className="self-center justify-self-end" />
+          </a>
+
+          <a
+            className="flex flex-row rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px] space-x-6 hover:cursor-pointer"
+            onClick={() => handleVoiceSettingsClick()}
+            rel="noopener noreferrer"
+          >
+            <p className="self-center justify-self-start">Settings</p>{" "}
+            <FiSettings className="self-center justify-self-end" />
+          </a>
         </div>
       </main>
 
