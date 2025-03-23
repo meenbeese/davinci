@@ -83,7 +83,7 @@ export default function Home() {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ scenes: storyPages, art_style: "minimalist, cartoon, watercolor", education_topic: "history", lang: "English", story_characters: key_features.characters }),
+              body: JSON.stringify({ scenes: storyPages, art_style: "minimalist, watercolor", education_topic: "history", lang: "English", story_characters: key_features.characters }),
             });
 
       if (!imageResponse.ok) {
