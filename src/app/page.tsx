@@ -181,7 +181,10 @@ export default function Home() {
           console.error("Upload error:", errorData);
         } else {
           const data = await response.json();
-          console.log("Upload success:", data);
+          console.log('Upload success:', data);
+          
+          // Update the prompt state to the description received from the server
+          setPrompt(data.description); // Use the description from the response
         }
       } catch (err) {
         console.error("Error uploading files:", err);

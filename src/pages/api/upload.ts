@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Disable Next.js's default body parsing
 export const config = {
@@ -13,7 +14,7 @@ export const config = {
 const uploadHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   const form = formidable({});
   
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) {
       return res.status(500).json({ error: 'Error parsing the files' });
     }
@@ -36,12 +37,30 @@ const uploadHandler = async (req: NextApiRequest, res: NextApiResponse) => {
     const oldPath = file.filepath;
     const newPath = path.join(uploadDir, file.originalFilename || 'uploaded_file');
 
-    fs.rename(oldPath, newPath, (err) => {
+    fs.rename(oldPath, newPath, async (err) => {
       if (err) {
         return res.status(500).json({ error: 'Error saving the file' });
       }
       console.log('File moved to:', newPath); // Log the new file path
-      res.status(200).json({ message: 'File uploaded successfully', filePath: newPath });
+
+      // Generate a description of the uploaded image
+      const genAI = new GoogleGenerativeAI("AIzaSyBmC77Ggk182Cil0nh_-96SWIiLahapNRM");
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+      const fileToGenerativePart = (path: string, mimeType: string) => ({
+        inlineData: {
+          data: Buffer.from(fs.readFileSync(path)).toString("base64"),
+          mimeType,
+        },
+      });
+
+      const prompt = "Describe how this product might be manufactured.";
+      const imagePart = fileToGenerativePart(newPath, file.mimetype); // Use the uploaded file's mime type
+
+      const result = await model.generateContent([prompt, imagePart]);
+      const description = result.response.text(); // Get the generated description
+
+      res.status(200).json({ message: 'File uploaded successfully', filePath: newPath, description }); // Include description in the response
     });
   });
 };
