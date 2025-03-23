@@ -17,10 +17,13 @@ export default function Home() {
 
   const [prompt, setPrompt] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [, setError] = React.useState<string | null>(null);
   const [pages, setPages] = React.useState<string[]>([]);
   const [title, setTitle] = React.useState<string | null>(null);
   const [allImageUrls, setAllImageUrls] = React.useState<string[]>([]);
+
+  const [imagesLoading, setImagesLoading] = React.useState<boolean[]>([]);
+  const [cardsLoading, setCardsLoading] = React.useState(false);
 
   const extractKeyFeatures = async (story: string) => {
     // setStory(null);
@@ -50,6 +53,7 @@ export default function Home() {
 
   const handleGenerateStory = async () => {
     setLoading(true);
+    setCardsLoading(true);
     setError(null);
     setPages([]); // Clear previous pages
     setAllImageUrls([]); // Clear previous image URLs
@@ -74,6 +78,7 @@ export default function Home() {
       // Split the story into pages
       const storyPages = story_response.story.split("<scene>");
       setPages(storyPages);
+      setImagesLoading(new Array(storyPages.length).fill(true));
 
       const key_features = await extractKeyFeatures(story_response.story);
       setTitle(key_features.title);
@@ -94,12 +99,14 @@ export default function Home() {
 
       const imageData = await imageResponse.json();
       setAllImageUrls(imageData.images);
+      setImagesLoading(new Array(storyPages.length).fill(false));
 
     } catch (err) {
       console.error("Error generating story:", err);
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
+      setCardsLoading(false);
     }
   };
 
@@ -316,16 +323,39 @@ export default function Home() {
             }`}
                 >
                   <p className="text-sm sm:text-base">{`Page ${index + 1}`}</p>
-                  <div className="flex-1 overflow-y-auto transition-opacity duration-300">
-                    {pages[index]}
-                  </div>
+                  {cardsLoading ? (
+                    <div className="flex-1 w-full animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-y-auto transition-opacity duration-300">
+                      {pages[index]}
+                    </div>
+                  )}
                   {allImageUrls && (
                     <div className="w-full h-48 flex items-center justify-center transition-opacity duration-300">
-                      <img
-                        src={allImageUrls[index]} // [0] = page 1, [1] = page 2, etc.
-                        alt={`Page ${index + 1} Illustration`}
-                        className="max-w-full max-h-full object-contain rounded-lg shadow-lg transform transition-all duration-500"
-                      />
+                      {allImageUrls[index] ? (
+                        imagesLoading[index] ? (
+                          <div className="w-full h-full rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                            <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        ) : (
+                          <img
+                            src={allImageUrls[index]}
+                            alt={`Page ${index + 1} Illustration`}
+                            className="max-w-full max-h-full object-contain rounded-lg shadow-lg transform transition-all duration-500"
+                            onLoad={() => {
+                              const newLoadingStates = [...imagesLoading];
+                              newLoadingStates[index] = false;
+                              setImagesLoading(newLoadingStates);
+                            }}
+                          />
+                        )
+                      ) : null}
                     </div>
                   )}
                 </div>
