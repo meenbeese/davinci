@@ -54,7 +54,7 @@ const uploadHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      const prompt = "Describe how this product might be manufactured.";
+      const prompt = "Describe this image in detail";
       const imagePart = fileToGenerativePart(newPath, file.mimetype); // Use the uploaded file's mime type
 
       const result = await model.generateContent([prompt, imagePart]);
