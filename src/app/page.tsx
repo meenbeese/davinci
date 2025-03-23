@@ -16,7 +16,7 @@ export default function Home() {
 
   const [prompt, setPrompt] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [, setError] = React.useState<string | null>(null);
   const [pages, setPages] = React.useState<string[]>([]);
   const [title, setTitle] = React.useState<string | null>(null);
   const [allImageUrls, setAllImageUrls] = React.useState<string[]>([]);
