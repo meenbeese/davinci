@@ -21,7 +21,7 @@ const uploadHandler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log('Parsed files:', files); // Log the files object
 
-    const file = files.file[0]; // Access the first file in the array
+    const file = files.file?.[0];
     if (!file) {
       return res.status(400).json({ error: 'No file uploaded or incorrect input name' });
     }
