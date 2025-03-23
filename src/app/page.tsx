@@ -19,6 +19,36 @@ export default function Home() {
   const [error, setError] = React.useState<string | null>(null);
   const [story, setStory] = React.useState<string | null>(null);
   const [pages, setPages] = React.useState<{ content: string; imageUrl: string | null }[]>([]);
+  const [characters, setCharacters] = React.useState<string[]>([]); // [0] = characters in scene 0, [1] = characters in scene 1, etc.
+  const [title, setTitle] = React.useState<string | null>(null);
+
+  const extractKeyFeatures = async (story: string) => {
+    setStory(null);
+
+    try {
+      const response = await fetch("/api/extractKeyFeatures", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ story }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to extract features.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log(data.characters, data.title);
+      setCharacters(data.characters);
+      setTitle(data.title);
+    } catch (err) {
+      console.error("Error extracting features:", err);
+      setError("An unexpected error occurred.");
+    }
+  };
 
   const handleGenerateStory = async () => {
     setLoading(true);
@@ -36,13 +66,13 @@ export default function Home() {
         },
         body: JSON.stringify({ prompt }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.message || "Failed to generate story.");
         return;
       }
-  
+
       const data = await response.json();
       console.log(data.story);
       setStory(data.story);
@@ -53,6 +83,8 @@ export default function Home() {
       // Initialize pages with content and null images
       const initialPages = storyPages.map((content) => ({ content, imageUrl: null }));
       setPages(initialPages);
+
+      extractKeyFeatures(data.story);
   
       // Generate images for each page with a delay
       for (let index = 0; index < storyPages.length; index++) {
@@ -353,8 +385,8 @@ export default function Home() {
 
         {/* Book Div */}
         <div className="flex flex-col gap-4 items-center">
-          <p className="text-2xl sm:text-3xl font-bold">Book Title</p>
-          <p className="text-sm sm:text-base">Author Name</p>
+          <p className="text-2xl sm:text-3xl font-bold">{title}</p>
+          <p className="text-sm sm:text-base">Author: Gemini</p>
           <div className="flex flex-row gap-4 items-center">
 
             {/* Page 1 */}
