@@ -3,11 +3,11 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "../../components/ui/avatar";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
+} from "../components/avatar";
+import { Button } from "../components/button";
+import { Card, CardContent } from "../components/card";
 
-export const page3 = () => {
+export default function page3() {
   // Education levels data
   const educationLevels = [
     { id: 1, name: "Kindergarten", selected: true },

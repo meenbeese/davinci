@@ -1,10 +1,10 @@
 import React from "react";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Separator } from "../../components/ui/separator";
+import { Button } from "../components/button";
+import { Card, CardContent } from "../components/card";
+import { Input } from "../components/input";
+import { Separator } from "../components/separator";
 
-export const page2 = () => {
+export default function page2() {
   return (
     <div className="bg-blue-500 flex flex-row justify-center w-full min-h-screen">
       <div className="relative w-[1122px] h-[675px]">

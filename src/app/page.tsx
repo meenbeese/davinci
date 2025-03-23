@@ -3,6 +3,7 @@
 import * as React from "react";
 import { FiVolume2, FiSettings, FiUploadCloud } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
+import Link from "next/link";
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
@@ -266,6 +267,13 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      <Link 
+        href="/page2" 
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 inline-block"
+      >
+        Go to Next Page
+      </Link>
 
         {/* Options Div */}
         <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
