@@ -231,19 +231,8 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Text Input Area */}
-            <div className="flex flex-col gap-2">
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter a text prompt (e.g., 'Write a children's story about...')"
-                className="w-[384px] h-[200px] p-6 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              />
-            </div>
-
         {/* Generate Image Section */}
-        <div className="flex flex-col items-center gap-4 mt-8">
-          <h2 className="text-xl font-bold">Generate AI Image</h2>
+        <div className="flex flex-col items-center gap-4 mt-2">
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -317,12 +306,12 @@ export default function Home() {
                 >
                   <p className="text-sm sm:text-base">{`Page ${index + 1}`}</p>
                   <div className="flex-1 overflow-y-auto transition-opacity duration-300">
-                    {page[curr_left_page]}
+                    {pages[index]}
                   </div>
                   {allImageUrls && (
                     <div className="w-full h-48 flex items-center justify-center transition-opacity duration-300">
                       <img
-                        src={allImageUrls[curr_left_page]}
+                        src={allImageUrls[index]} // [0] = page 1, [1] = page 2, etc.
                         alt={`Page ${index + 1} Illustration`}
                         className="max-w-full max-h-full object-contain rounded-lg shadow-lg transform transition-all duration-500"
                       />
