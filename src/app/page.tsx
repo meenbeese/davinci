@@ -341,66 +341,51 @@ export default function Home() {
         <div className="flex flex-col gap-4 items-center">
           <p className="text-2xl sm:text-3xl font-bold">{title}</p>
           <p className="text-sm sm:text-base">Author: Gemini</p>
-          <div className="flex flex-row gap-4 items-center">
-            {/* Page 1 */}
-            <div className="h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden">
-              <p className="text-sm sm:text-base">
-                {curr_left_page < pages.length
-                  ? `Page ${curr_left_page + 1}`
-                  : ""}
-              </p>
-              <div className="flex-1 overflow-y-auto">
-                {curr_left_page < pages.length
-                  ? pages[curr_left_page].content
-                  : ""}
-              </div>
-              {curr_left_page < pages.length &&
-                pages[curr_left_page].imageUrl && (
-                  <div className="w-full h-48 flex items-center justify-center">
-                    <img
-                      src={pages[curr_left_page].imageUrl}
-                      alt={`Page ${curr_left_page + 1} Illustration`}
-                      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-                    />
+          <div className="relative w-[632px] h-[500px]">
+            <div
+              className="flex flex-row gap-4 items-center absolute left-0 transition-transform duration-700 ease-in-out"
+              style={{ transform: `translateX(-${curr_left_page * 316}px)` }}
+            >
+              {pages.map((page, index) => (
+                <div
+                  key={index}
+                  className={`h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden
+            transform transition-all duration-700 ease-in-out ${
+              index === curr_left_page || index === curr_left_page + 1
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-95"
+            }`}
+                >
+                  <p className="text-sm sm:text-base">{`Page ${index + 1}`}</p>
+                  <div className="flex-1 overflow-y-auto transition-opacity duration-300">
+                    {page.content}
                   </div>
-                )}
-            </div>
-
-            {/* Page 2 */}
-            <div className="h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden">
-              <p className="text-sm sm:text-base">
-                {curr_left_page + 1 < pages.length
-                  ? `Page ${curr_left_page + 2}`
-                  : ""}
-              </p>
-              <div className="flex-1 overflow-y-auto">
-                {curr_left_page + 1 < pages.length
-                  ? pages[curr_left_page + 1].content
-                  : ""}
-              </div>
-              {curr_left_page + 1 < pages.length &&
-                pages[curr_left_page + 1].imageUrl && (
-                  <div className="w-full h-48 flex items-center justify-center">
-                    <img
-                      src={pages[curr_left_page + 1].imageUrl}
-                      alt={`Page ${curr_left_page + 2} Illustration`}
-                      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-                    />
-                  </div>
-                )}
+                  {page.imageUrl && (
+                    <div className="w-full h-48 flex items-center justify-center transition-opacity duration-300">
+                      <img
+                        src={page.imageUrl}
+                        alt={`Page ${index + 1} Illustration`}
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-lg transform transition-all duration-500"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="flex flex-row justify-between gap-4 mt-4">
             <button
-              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition transform hover:scale-110"
+              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               onClick={() => handlePrevPage()}
+              disabled={curr_left_page <= 1}
             >
               &lt;
             </button>
             <button
-              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition transform hover:scale-110"
+              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               onClick={() => handleNextPage()}
+              disabled={curr_left_page >= pages.length - 2}
             >
               &gt;
             </button>
