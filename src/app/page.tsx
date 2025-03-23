@@ -3,7 +3,6 @@
 import * as React from "react";
 import { FiVolume2, FiSettings, FiUploadCloud } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
-import Link from "next/link";
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
