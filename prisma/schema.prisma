@@ -16,21 +16,18 @@ model User {
   updatedAt      DateTime @updatedAt
   
   // Education Levels
-  kindergarten   Boolean
-  elementary     Boolean
-  middle         Boolean
-  high           Boolean
+  kindergarten   Boolean  @default(false)
+  elementary     Boolean  @default(false)
+  middle         Boolean  @default(false)
+  high           Boolean  @default(false)
   
   // Subject Areas
-  art            Boolean
-  business       Boolean
-  english        Boolean
-  french         Boolean
-  math           Boolean
-  music          Boolean
-  science        Boolean
-  social_sciences Boolean
-
-  // You might want to add relations here if needed
-  // stories        Story[]
+  art            Boolean  @default(false)
+  business       Boolean  @default(false)
+  english        Boolean  @default(false)
+  french         Boolean  @default(false)
+  math           Boolean  @default(false)
+  music          Boolean  @default(false)
+  science        Boolean  @default(false)
+  social_sciences Boolean  @default(false)
 }
