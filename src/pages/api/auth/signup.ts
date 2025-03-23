@@ -30,6 +30,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       email,
       password: hashedPassword,
       name,
+      kindergarten: false,
+      elementary: false,
+      middle: false,
+      high: false,
+      art: false,
+      business: false,
+      english: false,
+      french: false,
+      math: false,
+      music: false,
+      science: false,
+      social_sciences: false
     },
   });
 
