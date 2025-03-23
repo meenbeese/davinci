@@ -22,7 +22,7 @@ export default function AuthPage() {
       });
 
       if (res.ok) {
-        setIsSignUp(false); // Switch to sign-in after successful sign-up
+        router.push("/user_preferences"); // Redirect to home page after successful sign-up
       } else {
         const data = await res.json();
         setError(data.message || "Something went wrong");
