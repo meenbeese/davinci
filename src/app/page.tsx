@@ -1,32 +1,28 @@
 "use client";
 
 import * as React from "react";
-import {
-  FiVolume2,
-  FiSettings,
-  FiUploadCloud
-} from 'react-icons/fi';
-import { HiSparkles } from 'react-icons/hi';
+import { FiVolume2, FiSettings, FiUploadCloud } from "react-icons/fi";
+import { HiSparkles } from "react-icons/hi";
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
 
 export default function Home() {
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
-  const [utterance, setUtterance] = React.useState<SpeechSynthesisUtterance | null>(null);
+  const [utterance, setUtterance] =
+    React.useState<SpeechSynthesisUtterance | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [curr_left_page, setCurrLeftPage] = React.useState(0);
 
   const [prompt, setPrompt] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [story, setStory] = React.useState<string | null>(null);
-  const [pages, setPages] = React.useState<{ content: string; imageUrl: string | null }[]>([]);
-  const [characters, setCharacters] = React.useState<string[]>([]); // [0] = characters in scene 0, [1] = characters in scene 1, etc.
+  const [pages, setPages] = React.useState<string[]>([]);
   const [title, setTitle] = React.useState<string | null>(null);
+  const [allImageUrls, setAllImageUrls] = React.useState<string[]>([]);
 
   const extractKeyFeatures = async (story: string) => {
-    setStory(null);
+    // setStory(null);
 
     try {
       const response = await fetch("/api/extractKeyFeatures", {
@@ -44,9 +40,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      console.log(data.characters, data.title);
-      setCharacters(data.characters);
-      setTitle(data.title);
+      return data;
     } catch (err) {
       console.error("Error extracting features:", err);
       setError("An unexpected error occurred.");
@@ -56,10 +50,8 @@ export default function Home() {
   const handleGenerateStory = async () => {
     setLoading(true);
     setError(null);
-    setStory(null);
     setPages([]); // Clear previous pages
-  
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    setAllImageUrls([]); // Clear previous image URLs
   
     try {
       const response = await fetch("/api/generateStory", {
@@ -76,71 +68,32 @@ export default function Home() {
         return;
       }
 
-      const data = await response.json();
-      console.log(data.story);
-      setStory(data.story);
+      const story_response = await response.json();
   
       // Split the story into pages
-      const storyPages = data.story.split("<scene>").filter((page) => page.trim() !== "");
-  
-      // Initialize pages with content and null images
-      const initialPages = storyPages.map((content) => ({ content, imageUrl: null }));
-      setPages(initialPages);
+      const storyPages = story_response.story.split("<scene>");
+      setPages(storyPages);
 
-      extractKeyFeatures(data.story);
-  
-      // Generate images for each page with a delay
-      for (let index = 0; index < storyPages.length; index++) {
-        const pageContent = storyPages[index];
-  
-        try {
-          // Step 1: Summarize the page content
-          const summaryResponse = await fetch("/api/summarizePage", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ content: pageContent }),
-          });
-  
-          if (!summaryResponse.ok) {
-            console.error(`Failed to summarize page ${index + 1}`);
-            continue;
-          }
-  
-          const summaryData = await summaryResponse.json();
-          const summary = summaryData.summary;
-  
-          // Step 2: Generate an image based on the summary
-          const imagePrompt = `Create an abstract and symbolic illustration suitable for children based on the following description: ${summary}`;
-          const imageResponse = await fetch("/api/generateImage", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ prompt: imagePrompt }),
-          });
-  
-          if (!imageResponse.ok) {
-            console.error(`Failed to generate image for page ${index + 1}`);
-            continue;
-          }
-  
-          const imageData = await imageResponse.json();
-  
-          // Update the page with the generated image
-          setPages((prevPages) =>
-            prevPages.map((page, i) =>
-              i === index ? { ...page, imageUrl: imageData.imageUrl } : page
-            )
-          );
-        } catch (err) {
-          console.error(`Error generating image for page ${index + 1}:`, err);
-        }
-  
-        // Add a delay before the next request
-        await delay(100); // 100ms delay
+      const key_features = await extractKeyFeatures(story_response.story);
+      setTitle(key_features.title);
+      console.log(key_features.characters);
+
+      const imageResponse = await fetch("/api/generateImage", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ scenes: storyPages, art_style: "minimalist, cartoon, watercolor", education_topic: "history", lang: "English", story_characters: key_features.characters }),
+            });
+
+      if (!imageResponse.ok) {
+        console.error(`Failed to generate images`);
+        return;
       }
+
+      const imageData = await imageResponse.json();
+      setAllImageUrls(imageData.images);
+
     } catch (err) {
       console.error("Error generating story:", err);
       setError("An unexpected error occurred.");
@@ -155,7 +108,7 @@ export default function Home() {
     utterance.rate = 1;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    
+
     // Load voices when available
     const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices();
@@ -164,15 +117,15 @@ export default function Home() {
         utterance.voice = englishVoice;
       }
     };
-    
+
     // Try loading immediately
     loadVoices();
-    
+
     // Also set up event listener for when voices change
     window.speechSynthesis.onvoiceschanged = loadVoices;
-    
+
     setUtterance(utterance);
-    
+
     return () => {
       window.speechSynthesis.onvoiceschanged = null;
     };
@@ -180,50 +133,52 @@ export default function Home() {
 
   const handleVoiceClick = () => {
     if (utterance) {
-      let text = pages[curr_left_page]
-      if (curr_left_page+1<pages.length) {
-        text += " " + pages[curr_left_page+1];
+      let text = pages[curr_left_page];
+      if (curr_left_page + 1 < pages.length) {
+        text += " " + pages[curr_left_page + 1];
       }
       textToSpeech(text, utterance);
     }
-  }
+  };
 
   const handleVoiceSettingsClick = () => {
     setIsSettingsOpen(true);
-  }
+  };
 
   const handlePrevPage = () => {
     if (curr_left_page > 1) {
       setCurrLeftPage(curr_left_page - 2);
     }
-  }
+  };
 
   const handleNextPage = () => {
     if (curr_left_page < pages.length - 2) {
       setCurrLeftPage(curr_left_page + 2);
     }
-  }
+  };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
       setSelectedFiles(filesArray);
       console.log("Selected files:", filesArray);
 
       const formData = new FormData();
-      filesArray.forEach(file => {
-        formData.append('file', file);
+      filesArray.forEach((file) => {
+        formData.append("file", file);
       });
 
       try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
+        const response = await fetch("/api/upload", {
+          method: "POST",
           body: formData,
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Upload error:', errorData);
+          console.error("Upload error:", errorData);
         } else {
           const data = await response.json();
           console.log('Upload success:', data);
@@ -232,66 +187,83 @@ export default function Home() {
           setPrompt(data.description); // Use the description from the response
         }
       } catch (err) {
-        console.error('Error uploading files:', err);
+        console.error("Error uploading files:", err);
       }
     }
-  }
+  };
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-row gap-[32px] row-start-2 items-center sm:items-start">
+    <div className="grid grid-rows-[auto_1fr_auto] items-start justify-items-center min-h-screen py-4 gap-4 sm:p-4 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-row gap-[32px] items-center sm:items-start">
+        <div className="flex flex-col items-center gap-6">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+            Generate AI Story
+          </h2>
 
-    {/* File Upload Area */}
-    <div className="flex flex-col items-center gap-4">
-      <label
-        htmlFor="file-upload"
-        className="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition"
-      >
-        <FiUploadCloud className="text-4xl text-blue-500 mb-2" />
-        <p className="text-lg font-medium text-gray-700">
-          Drag & drop files or <span className="text-blue-500 underline">Browse</span>
-        </p>
-        <p className="text-sm text-gray-500 mt-1">
-          Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word, PPT
-        </p>
-      </label>
-      <input
-        id="file-upload"
-        type="file"
-        accept=".jpeg,.png,.gif,.mp4,.pdf,.psd,.ai,.docx,.pptx"
-        multiple
-        className="hidden"
-        onChange={handleFileChange}
-      />
-      {selectedFiles.length > 0 && (
-        <div className="mt-4 text-sm text-gray-600">
-          <p>Selected Files:</p>
-          <ul className="list-disc pl-5">
-            {selectedFiles.map((file, index) => (
-              <li key={index}>{file.name}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+          <div className="flex flex-col gap-6">
+            {/* File Upload Area */}
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="file-upload"
+                className="flex flex-col items-center justify-center w-[384px] h-[200px] p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition"
+              >
+                <FiUploadCloud className="text-4xl text-blue-500 mb-2" />
+                <p className="text-lg font-medium text-gray-700">
+                  Drag & drop files or{" "}
+                  <span className="text-blue-500 underline">Browse</span>
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word,
+                  PPT
+                </p>
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                accept=".jpeg,.png,.gif,.mp4,.pdf,.psd,.ai,.docx,.pptx"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </div>
 
-        {/* Generate Story Section */}
-        <div className="flex flex-col items-center gap-4 mt-8">
-          <h2 className="text-xl font-bold">Generate AI Story</h2>
+            {/* Divider text */}
+            <div className="flex items-center justify-center -my-2">
+              <p className="text-center text-gray-400 px-4">
+                or type naturally
+              </p>
+            </div>
+
+        {/* Generate Image Section */}
+        <div className="flex flex-col items-center gap-4 mt-2">
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter a text prompt (e.g., 'Write a children's story about...')"
+            placeholder="Enter a text prompt (e.g., 'A futuristic cityscape at sunset')"
             className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={4}
           />
-          <button
-            onClick={handleGenerateStory}
-            disabled={loading || !prompt}
-            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 flex items-center gap-2"
-          >
-            <span>{loading ? "Generating..." : "Generate Story"}</span>
-            <HiSparkles className="w-5 h-5" />
-          </button>
+
+            <button
+              onClick={handleGenerateStory}
+              disabled={loading || !prompt}
+              className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <span>{loading ? "Generating..." : "Generate Story"}</span>
+              <HiSparkles className="w-5 h-5" />
+            </button>
+          </div>
+
+          {selectedFiles.length > 0 && (
+            <div className="text-sm text-gray-600">
+              <p>Selected Files:</p>
+              <ul className="list-disc pl-5">
+                {selectedFiles.map((file, index) => (
+                  <li key={index}>{file.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -302,7 +274,8 @@ export default function Home() {
             onClick={() => handleVoiceClick()}
             rel="noopener noreferrer"
           >
-            <p className="self-center justify-self-start">Voice</p> <FiVolume2 className="self-center justify-self-end" />
+            <p className="self-center justify-self-start">Voice</p>{" "}
+            <FiVolume2 className="self-center justify-self-end" />
           </a>
 
           <a
@@ -310,7 +283,8 @@ export default function Home() {
             onClick={() => handleVoiceSettingsClick()}
             rel="noopener noreferrer"
           >
-            <p className="self-center justify-self-start">Settings</p> <FiSettings className="self-center justify-self-end" />
+            <p className="self-center justify-self-start">Settings</p>{" "}
+            <FiSettings className="self-center justify-self-end" />
           </a>
         </div>
 
@@ -318,67 +292,61 @@ export default function Home() {
         <div className="flex flex-col gap-4 items-center">
           <p className="text-2xl sm:text-3xl font-bold">{title}</p>
           <p className="text-sm sm:text-base">Author: Gemini</p>
-          <div className="flex flex-row gap-4 items-center">
-
-            {/* Page 1 */}
-            <div className="h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden">
-              <p className="text-sm sm:text-base">
-                {curr_left_page < pages.length ? `Page ${curr_left_page + 1}` : ""}
-              </p>
-              <div className="flex-1 overflow-y-auto">
-                {curr_left_page < pages.length ? pages[curr_left_page].content : ""}
-              </div>
-              {curr_left_page < pages.length && pages[curr_left_page].imageUrl && (
-                <div className="w-full h-48 flex items-center justify-center">
-                  <img
-                    src={pages[curr_left_page].imageUrl}
-                    alt={`Page ${curr_left_page + 1} Illustration`}
-                    className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-                  />
+          <div className="relative w-[632px] h-[500px]">
+            <div
+              className="flex flex-row gap-4 items-center absolute left-0 transition-transform duration-700 ease-in-out"
+              style={{ transform: `translateX(-${curr_left_page * 316}px)` }}
+            >
+              {pages.map((page, index) => (
+                <div
+                  key={index}
+                  className={`h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden
+            transform transition-all duration-700 ease-in-out ${
+              index === curr_left_page || index === curr_left_page + 1
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-95"
+            }`}
+                >
+                  <p className="text-sm sm:text-base">{`Page ${index + 1}`}</p>
+                  <div className="flex-1 overflow-y-auto transition-opacity duration-300">
+                    {pages[index]}
+                  </div>
+                  {allImageUrls && (
+                    <div className="w-full h-48 flex items-center justify-center transition-opacity duration-300">
+                      <img
+                        src={allImageUrls[index]} // [0] = page 1, [1] = page 2, etc.
+                        alt={`Page ${index + 1} Illustration`}
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-lg transform transition-all duration-500"
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Page 2 */}
-            <div className="h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden">
-              <p className="text-sm sm:text-base">
-                {curr_left_page + 1 < pages.length ? `Page ${curr_left_page + 2}` : ""}
-              </p>
-              <div className="flex-1 overflow-y-auto">
-                {curr_left_page + 1 < pages.length ? pages[curr_left_page + 1].content : ""}
-              </div>
-              {curr_left_page + 1 < pages.length && pages[curr_left_page + 1].imageUrl && (
-                <div className="w-full h-48 flex items-center justify-center">
-                  <img
-                    src={pages[curr_left_page + 1].imageUrl}
-                    alt={`Page ${curr_left_page + 2} Illustration`}
-                    className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-                  />
-                </div>
-              )}
+              ))}
             </div>
           </div>
 
           <div className="flex flex-row justify-between gap-4 mt-4">
             <button
-              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition transform hover:scale-110"
+              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               onClick={() => handlePrevPage()}
+              disabled={curr_left_page <= 1}
             >
               &lt;
             </button>
             <button
-              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition transform hover:scale-110"
+              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               onClick={() => handleNextPage()}
+              disabled={curr_left_page >= pages.length - 2}
             >
               &gt;
             </button>
           </div>
         </div>
       </main>
-      
+
       {/* Voice Settings Popup */}
       {utterance && (
-        <VoiceSettingsPopup 
+        <VoiceSettingsPopup
           utterance={utterance}
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}

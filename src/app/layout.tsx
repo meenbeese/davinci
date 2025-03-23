@@ -4,6 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { FiLogIn, FiLogOut } from 'react-icons/fi';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -29,7 +30,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition"
           onClick={() => router.push("/")}
         >
-          FinLit App
+          DaVinci
         </h1>
         <div className="flex items-center gap-4">
           {session ? (
@@ -37,17 +38,19 @@ function Layout({ children }: { children: React.ReactNode }) {
               <p className="text-sm">Welcome, {session.user?.name || "User"}!</p>
               <button
                 onClick={() => signOut()}
-                className="text-sm text-red-300 hover:text-red-100 transition"
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-300 rounded-full transition-all duration-200 border border-red-500/20"
               >
-                Log Out
+                <span className="text-sm">Log Out</span>
+                <FiLogOut className="w-4 h-4" />
               </button>
             </>
           ) : (
             <button
               onClick={() => router.push("/auth")}
-              className="text-sm text-blue-300 hover:text-blue-100 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 rounded-full transition-all duration-200 border border-blue-500/20"
             >
-              Log In / Sign Up
+              <span className="text-sm">Log In</span>
+              <FiLogIn className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -58,7 +61,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Footer */}
       <footer className="p-4 bg-#171717 text-center">
-        <p>© 2025 FinLit App. All rights reserved.</p>
+        <p>© 2025 DaVinci. All rights reserved.</p>
       </footer>
     </div>
   );
