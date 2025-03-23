@@ -32,7 +32,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-4 mx-4 bg-blue-800 text-white shadow-lg rounded-lg p-6 flex justify-between items-center z-50">
+      <header className="sticky top-4 mx-4 bg-white dark:bg-gray-800 text-white shadow-lg rounded-lg p-6 flex justify-between items-center z-50">
         <h1 
           className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition"
           onClick={() => router.push("/")}
@@ -43,7 +43,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <p className="text-sm">Welcome, {session.user?.name || "User"}!</p>
           <button
             onClick={() => signOut()}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-300 rounded-full transition-all duration-200 border border-red-500/20"
+            className="flex items-center gap-2 px-4 py-2 bg-amber-800/10 hover:bg-amber-800/20 text-amber-600 rounded-full transition-all duration-200 border border-amber-800/20"
           >
             <span className="text-sm">Log Out</span>
             <FiLogOut className="w-4 h-4" />

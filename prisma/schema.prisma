@@ -1,23 +1,36 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite" // You can use PostgreSQL, MySQL, etc.
-  url      = "file:./dev.db" // Update this for your database
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  name      String?
-  email     String  @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  name           String?
+  email          String   @unique
+  password       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Education Levels
+  kindergarten   Boolean
+  elementary     Boolean
+  middle         Boolean
+  high           Boolean
+  
+  // Subject Areas
+  art            Boolean
+  business       Boolean
+  english        Boolean
+  french         Boolean
+  math           Boolean
+  music          Boolean
+  science        Boolean
+  social_sciences Boolean
+
+  // You might want to add relations here if needed
+  // stories        Story[]
 }
