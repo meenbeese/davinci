@@ -31,7 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash-exp-image-generation",
     generationConfig: {
-        responseModalities: ['Text', 'Image']
+      // @ts-expect-error: 'responseModalities' is not part of the type definition, but we need it
+      responseModalities: ['Text', 'Image']
     },
   });
 
