@@ -21,7 +21,7 @@ const uploadHandler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log('Parsed files:', files); // Log the files object
 
-    const file = files.file[0]; // Access the first file in the array
+    const file = files.file?.[0];
     if (!file) {
       return res.status(400).json({ error: 'No file uploaded or incorrect input name' });
     }
@@ -44,7 +44,7 @@ const uploadHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       console.log('File moved to:', newPath); // Log the new file path
 
       // Generate a description of the uploaded image
-      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const fileToGenerativePart = (path: string, mimeType: string) => ({
@@ -55,8 +55,7 @@ const uploadHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
       const prompt = "Describe this image in detail";
-      const imagePart = fileToGenerativePart(newPath, file.mimetype); // Use the uploaded file's mime type
-
+      const imagePart = fileToGenerativePart(newPath, file.mimetype || 'application/octet-stream'); // Use the uploaded file's mime type or a default
       const result = await model.generateContent([prompt, imagePart]);
       const description = result.response.text(); // Get the generated description
 

@@ -60,6 +60,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Generate the 2D array summary
     const response = await model.generateContent(ourPrompt);
     let summaryArray = "";
+    if (!response.response?.candidates?.[0]?.content?.parts) {
+      console.error("Candidates or content parts are undefined. Response:", JSON.stringify(response, null, 2));
+      return res.status(500).json({ message: "Failed to summarize content." });
+    }
     for (const part of response.response.candidates[0].content.parts) {
       summaryArray += part.text;
     }

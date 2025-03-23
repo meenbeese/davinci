@@ -30,9 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash-exp-image-generation",
-    generationConfig: {
-        responseModalities: ['Text', 'Image']
-    },
+    generationConfig: {},
   });
 
   const images = []
