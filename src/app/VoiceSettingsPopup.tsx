@@ -17,26 +17,6 @@ export default function VoiceSettingsPopup({ utterance, isOpen, onClose }: { utt
 
     const [focusedSetting, setFocusedSetting] = React.useState<keyof VoiceSettings>("voice");
 
-    // Available language options
-    const languages = [
-        "en-US", "en-GB", "es-ES", "fr-FR", "de-DE", 
-        "it-IT", "ja-JP", "ko-KR", "zh-CN", "ru-RU"
-    ];
-
-    // Language display names
-    const languageNames: { [key: string]: string } = {
-        "en-US": "English (US)",
-        "en-GB": "English (UK)",
-        "es-ES": "Spanish",
-        "fr-FR": "French",
-        "de-DE": "German",
-        "it-IT": "Italian",
-        "ja-JP": "Japanese",
-        "ko-KR": "Korean",
-        "zh-CN": "Chinese",
-        "ru-RU": "Russian"
-    };
-
     // Load voices when component mounts
     React.useEffect(() => {
         const loadVoices = () => {
@@ -113,13 +93,6 @@ export default function VoiceSettingsPopup({ utterance, isOpen, onClose }: { utt
                 ? (settings.voice + 1) % voices.length
                 : (settings.voice - 1 + voices.length) % voices.length;
             break;
-            case 'lang':
-            const langIndex = languages.indexOf(settings.lang);
-            const newLangIndex = increase
-                ? (langIndex + 1) % languages.length
-                : (langIndex - 1 + languages.length) % languages.length;
-            newSettings.lang = languages[newLangIndex];
-            break;
             case 'rate':
             // Rate: 0.1 to 10
             newSettings.rate = Math.max(0.1, Math.min(10, settings.rate + (increase ? 0.1 : -0.1)));
@@ -164,7 +137,7 @@ export default function VoiceSettingsPopup({ utterance, isOpen, onClose }: { utt
         const previewText = `Current ${setting}: ${setting === 'voice' ?
 
             voices.length > 0 && newSettings.voice < voices.length ? voices[newSettings.voice].name : 'Loading voices...' :
-            setting === 'lang' ? languageNames[newSettings.lang] || newSettings.lang :
+            setting === 'lang' ? newSettings.lang :
             (newSettings[setting as keyof VoiceSettings] as number).toFixed(1)}`;
         
         // Copy all settings to the temporary utterance
@@ -214,17 +187,6 @@ export default function VoiceSettingsPopup({ utterance, isOpen, onClose }: { utt
                     voices[settings.voice].name : 'Loading voices...'}</span>
                 <span className="text-gray-500 text-sm">
                     {focusedSetting === 'voice' ? 'Use ← → arrows to change' : 'Tab to focus'}
-                </span>
-                </div>
-            </div>
-            
-            {/* Language Selection */}
-            <div className={`${focusedSetting === 'lang' ? 'bg-blue-100 dark:bg-blue-900/30 p-2 rounded' : ''}`}>
-                <label className="block text-sm font-medium mb-1">Language</label>
-                <div className="flex justify-between items-center">
-                <span>Current: {languageNames[settings.lang] || settings.lang}</span>
-                <span className="text-gray-500 text-sm">
-                    {focusedSetting === 'lang' ? 'Use ← → arrows to change' : 'Tab to focus'}
                 </span>
                 </div>
             </div>
