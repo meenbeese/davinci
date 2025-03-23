@@ -13,17 +13,14 @@ export default function Home() {
   const [curr_left_page, setCurrLeftPage] = React.useState(0);
 
   const [prompt, setPrompt] = React.useState("");
-  const [storyPrompt, setStoryPrompt] = React.useState("");
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [story, setStory] = React.useState<string | null>(null);
-  const [pages, setPages] = React.useState<{ content: string; imageUrl: string | null }[]>([]);
-  const [characters, setCharacters] = React.useState<string[]>([]); // [0] = characters in scene 0, [1] = characters in scene 1, etc.
+  const [pages, setPages] = React.useState<string[]>([]);
   const [title, setTitle] = React.useState<string | null>(null);
+  const [allImageUrls, setAllImageUrls] = React.useState<string[]>([]);
 
   const extractKeyFeatures = async (story: string) => {
-    setStory(null);
+    // setStory(null);
 
     try {
       const response = await fetch("/api/extractKeyFeatures", {
@@ -41,9 +38,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      console.log(data.characters, data.title);
-      setCharacters(data.characters);
-      setTitle(data.title);
+      return data;
     } catch (err) {
       console.error("Error extracting features:", err);
       setError("An unexpected error occurred.");
@@ -53,10 +48,8 @@ export default function Home() {
   const handleGenerateStory = async () => {
     setLoading(true);
     setError(null);
-    setStory(null);
     setPages([]); // Clear previous pages
-  
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    setAllImageUrls([]); // Clear previous image URLs
   
     try {
       const response = await fetch("/api/generateStory", {
@@ -73,138 +66,34 @@ export default function Home() {
         return;
       }
 
-      const data = await response.json();
-      console.log(data.story);
-      setStory(data.story);
+      const story_response = await response.json();
   
       // Split the story into pages
-      const storyPages = data.story.split("<scene>").filter((page) => page.trim() !== "");
-  
-      // Initialize pages with content and null images
-      const initialPages = storyPages.map((content) => ({ content, imageUrl: null }));
-      setPages(initialPages);
+      const storyPages = story_response.story.split("<scene>");
+      setPages(storyPages);
 
-      extractKeyFeatures(data.story);
-  
-      // Generate images for each page with a delay
-      for (let index = 0; index < storyPages.length; index++) {
-        const pageContent = storyPages[index];
-  
-        try {
-          // Step 1: Summarize the page content
-          const summaryResponse = await fetch("/api/summarizePage", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ content: pageContent }),
-          });
-  
-          if (!summaryResponse.ok) {
-            console.error(`Failed to summarize page ${index + 1}`);
-            continue;
-          }
-  
-          const summaryData = await summaryResponse.json();
-          const summary = summaryData.summary;
-  
-          // Step 2: Generate an image based on the summary
-          const imagePrompt = `Create an abstract and symbolic illustration suitable for children based on the following description: ${summary}`;
-          const imageResponse = await fetch("/api/generateImage", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ prompt: imagePrompt }),
-          });
-  
-          if (!imageResponse.ok) {
-            console.error(`Failed to generate image for page ${index + 1}`);
-            continue;
-          }
-  
-          const imageData = await imageResponse.json();
-  
-          // Update the page with the generated image
-          setPages((prevPages) =>
-            prevPages.map((page, i) =>
-              i === index ? { ...page, imageUrl: imageData.imageUrl } : page
-            )
-          );
-        } catch (err) {
-          console.error(`Error generating image for page ${index + 1}:`, err);
-        }
-  
-        // Add a delay before the next request
-        await delay(100); // 100ms delay
-      }
-    } catch (err) {
-      console.error("Error generating story:", err);
-      setError("An unexpected error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      const key_features = await extractKeyFeatures(story_response.story);
+      setTitle(key_features.title);
+      console.log(key_features.characters);
 
-  // const handleGenerateStory = async () => {
-  //   if (!storyPrompt.trim()) {
-  //     setStoryError("Please enter a prompt.");
-  //     return;
-  //   }
-  
-  //   setLoadingStory(true);
-  //   setStoryError(null);
-  //   setStory(null);
-  
-  //   try {
-  //     const response = await fetch("/api/generateStory", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ prompt: storyPrompt }),
-  //     });
-  
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       setStoryError(errorData.message || "Failed to generate story.");
-  //       return;
-  //     }
-  
-  //     const data = await response.json();
-  //     setStory(data.story);
-  //   } catch (err) {
-  //     console.error("Error generating story:", err);
-  //     setStoryError("An unexpected error occurred.");
-  //   } finally {
-  //     setLoadingStory(false);
-  //   }
-  // };
+      const imageResponse = await fetch("/api/generateImage", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ scenes: storyPages, art_style: "minimalist, cartoon, watercolor", education_topic: "history", lang: "English", story_characters: key_features.characters }),
+            });
 
-  const handleGenerateImage = async () => {
-    setLoading(true);
-    setError(null);
-    setImageUrl(null);
-
-    try {
-      const response = await fetch("/api/generateImage", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to generate image.");
+      if (!imageResponse.ok) {
+        console.error(`Failed to generate images`);
         return;
       }
 
-      const data = await response.json();
-      setImageUrl(data.imageUrl);
+      const imageData = await imageResponse.json();
+      setAllImageUrls(imageData.images);
+
     } catch (err) {
-      console.error("Error generating image:", err);
+      console.error("Error generating story:", err);
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
@@ -270,7 +159,6 @@ export default function Home() {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
       setSelectedFiles(filesArray);
-      console.log("Selected files:", filesArray);
     }
   }
 
@@ -329,40 +217,9 @@ export default function Home() {
           >
             {loading ? "Generating..." : "Generate Story"}
           </button>
-          <button
-            onClick={handleGenerateImage}
-            disabled={loading || !prompt}
-            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
-          >
-            {loading ? "Generating..." : "Generate Image"}
-          </button>
+
         </div>
-        {/* Generate Story Section
-          <div className="flex flex-col items-center gap-4 mt-8">
-            <h2 className="text-xl font-bold">Generate Story</h2>
-            <textarea
-              value={storyPrompt}
-              onChange={(e) => setStoryPrompt(e.target.value)}
-              placeholder="Enter a text prompt (e.g., 'Write a short story about a futuristic city.')"
-              className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={4}
-            />
-            <button
-              onClick={handleGenerateStory}
-              disabled={loadingStory || !storyPrompt.trim()}
-              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
-            >
-              {loadingStory ? "Generating..." : "Generate Story"}
-            </button>
-            {storyError && <p className="text-red-500">{storyError}</p>}
-            {story && (
-              <div className="mt-4">
-                <h3 className="text-lg font-bold">Generated Story:</h3>
-                <p className="text-gray-700 whitespace-pre-line">{story}</p>
-              </div>
-            )}
-          </div> */}
-        </div>
+      </div>
 
         {/* Options Div */}
         <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
@@ -395,12 +252,12 @@ export default function Home() {
                 {curr_left_page < pages.length ? `Page ${curr_left_page + 1}` : ""}
               </p>
               <div className="flex-1 overflow-y-auto">
-                {curr_left_page < pages.length ? pages[curr_left_page].content : ""}
+                {curr_left_page < pages.length ? pages[curr_left_page] : ""}
               </div>
-              {curr_left_page < pages.length && pages[curr_left_page].imageUrl && (
+              {curr_left_page < pages.length && (
                 <div className="w-full h-48 flex items-center justify-center">
                   <img
-                    src={pages[curr_left_page].imageUrl}
+                    src={allImageUrls[curr_left_page]}
                     alt={`Page ${curr_left_page + 1} Illustration`}
                     className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                   />
@@ -414,12 +271,12 @@ export default function Home() {
                 {curr_left_page + 1 < pages.length ? `Page ${curr_left_page + 2}` : ""}
               </p>
               <div className="flex-1 overflow-y-auto">
-                {curr_left_page + 1 < pages.length ? pages[curr_left_page + 1].content : ""}
+                {curr_left_page + 1 < pages.length ? pages[curr_left_page + 1] : ""}
               </div>
-              {curr_left_page + 1 < pages.length && pages[curr_left_page + 1].imageUrl && (
+              {curr_left_page + 1 < pages.length && (
                 <div className="w-full h-48 flex items-center justify-center">
                   <img
-                    src={pages[curr_left_page + 1].imageUrl}
+                    src={allImageUrls[curr_left_page + 1]}
                     alt={`Page ${curr_left_page + 2} Illustration`}
                     className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                   />
