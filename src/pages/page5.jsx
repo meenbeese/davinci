@@ -1,7 +1,7 @@
 import React from "react";
-import { Avatar, AvatarImage } from "../../components/ui/avatar";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
+import { Avatar, AvatarImage } from "../components/avatar";
+import { Button } from "../components/button";
+import { Card, CardContent } from "../components/card";
 
 export const page5 = () => {
   // Data for page numbers

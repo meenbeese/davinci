@@ -3,11 +3,11 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "../../components/ui/avatar";
-import { Card, CardContent } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
+} from "../components/avatar";
+import { Card, CardContent } from "../components/card";
+import { Input } from "../components/input";
 
-export const page4 = (): JSX.Element => {
+export const page4 = () => {
   // Data for the page
   const userData = {
     name: "Khusan Akhmedov",
