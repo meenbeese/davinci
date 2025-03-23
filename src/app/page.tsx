@@ -358,32 +358,40 @@ export default function Home() {
           <div className="flex flex-row gap-4 items-center">
 
             {/* Page 1 */}
-            <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
+            <div className="h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden">
               <p className="text-sm sm:text-base">
                 {curr_left_page < pages.length ? `Page ${curr_left_page + 1}` : ""}
               </p>
-              {curr_left_page < pages.length ? pages[curr_left_page].content : ""}
+              <div className="flex-1 overflow-y-auto">
+                {curr_left_page < pages.length ? pages[curr_left_page].content : ""}
+              </div>
               {curr_left_page < pages.length && pages[curr_left_page].imageUrl && (
-                <img
-                  src={pages[curr_left_page].imageUrl}
-                  alt={`Page ${curr_left_page + 1} Illustration`}
-                  className="mt-4 rounded-lg shadow-lg"
-                />
+                <div className="w-full h-48 flex items-center justify-center">
+                  <img
+                    src={pages[curr_left_page].imageUrl}
+                    alt={`Page ${curr_left_page + 1} Illustration`}
+                    className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                  />
+                </div>
               )}
             </div>
 
             {/* Page 2 */}
-            <div className="h-[500] w-[300] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
+            <div className="h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden">
               <p className="text-sm sm:text-base">
                 {curr_left_page + 1 < pages.length ? `Page ${curr_left_page + 2}` : ""}
               </p>
-              {curr_left_page + 1 < pages.length ? pages[curr_left_page + 1].content : ""}
+              <div className="flex-1 overflow-y-auto">
+                {curr_left_page + 1 < pages.length ? pages[curr_left_page + 1].content : ""}
+              </div>
               {curr_left_page + 1 < pages.length && pages[curr_left_page + 1].imageUrl && (
-                <img
-                  src={pages[curr_left_page + 1].imageUrl}
-                  alt={`Page ${curr_left_page + 2} Illustration`}
-                  className="mt-4 rounded-lg shadow-lg"
-                />
+                <div className="w-full h-48 flex items-center justify-center">
+                  <img
+                    src={pages[curr_left_page + 1].imageUrl}
+                    alt={`Page ${curr_left_page + 2} Illustration`}
+                    className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                  />
+                </div>
               )}
             </div>
           </div>
