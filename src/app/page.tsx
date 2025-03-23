@@ -314,7 +314,7 @@ export default function Home() {
 
         {/* Generate Image Section */}
         <div className="flex flex-col items-center gap-4 mt-8">
-          <h2 className="text-xl font-bold">Generate AI Image</h2>
+          <h2 className="text-xl font-bold">Generate AI Story</h2>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
