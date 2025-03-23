@@ -5,6 +5,9 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
+const ADMIN_EMAIL = "kuzey@davinci.com";
+const ADMIN_PASSWORD = "admin123";
+
 export default NextAuth({
   providers: [
     CredentialsProvider({
@@ -18,40 +21,53 @@ export default NextAuth({
           return null;
         }
 
-        // Find user in the database
+        if (credentials.email === ADMIN_EMAIL && credentials.password === ADMIN_PASSWORD) {
+          return {
+            id: "admin",
+            name: "Kuzey",
+            email: ADMIN_EMAIL,
+            isAdmin: true
+          };
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
 
         if (!user) {
-          return null; // User not found
+          return null;
         }
 
-        // Verify password
         const isValidPassword = await bcrypt.compare(
           credentials.password,
           user.password
         );
 
         if (!isValidPassword) {
-          return null; // Invalid password
+          return null;
         }
 
-        return { id: user.id.toString(), name: user.name, email: user.email };
+        return { 
+          id: user.id.toString(), 
+          name: user.name, 
+          email: user.email,
+          isAdmin: false
+        };
       },
     }),
   ],
   callbacks: {
     async session({ session, token }) {
-      // Ensure session.user exists
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.isAdmin = token.isAdmin as boolean;
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.isAdmin = user.isAdmin;
       }
       return token;
     },
