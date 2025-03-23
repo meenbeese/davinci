@@ -275,13 +275,6 @@ export default function Home() {
         </div>
       </div>
 
-      <Link 
-        href="/page2" 
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 inline-block"
-      >
-        Go to Next Page
-      </Link>
-
         {/* Options Div */}
         <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
           <a
