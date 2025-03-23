@@ -19,7 +19,7 @@ const LoadingOverlay = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress(prevProgress => {
-        const newProgress = prevProgress + (1 + Math.random() * 2);
+        const newProgress = prevProgress + (1.5);
         return newProgress > 100 ? 100 : newProgress;
       });
     }, 200);
