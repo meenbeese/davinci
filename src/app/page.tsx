@@ -227,6 +227,9 @@ export default function Home() {
         } else {
           const data = await response.json();
           console.log('Upload success:', data);
+          
+          // Update the prompt state to indicate file upload
+          setPrompt("Making a story with the image submitted");
         }
       } catch (err) {
         console.error('Error uploading files:', err);
