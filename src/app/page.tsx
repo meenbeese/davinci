@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { FiVolume2, FiSettings, FiUploadCloud } from 'react-icons/fi'; // Feather icons
+import {
+  FiVolume2,
+  FiSettings,
+  FiUploadCloud
+} from 'react-icons/fi';
+import { HiSparkles } from 'react-icons/hi';
 
 import { textToSpeech } from "./text_to_speech";
 import VoiceSettingsPopup from "./VoiceSettingsPopup.tsx";
@@ -257,9 +262,10 @@ export default function Home() {
           <button
             onClick={handleGenerateStory}
             disabled={loading || !prompt}
-            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 flex items-center gap-2"
           >
-            {loading ? "Generating..." : "Generate Story"}
+            <span>{loading ? "Generating..." : "Generate Story"}</span>
+            <HiSparkles className="w-5 h-5" />
           </button>
         </div>
       </div>
