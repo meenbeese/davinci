@@ -284,92 +284,106 @@ export default function Home() {
         </div>
 
         {/* Book Div */}
-        <div className="flex flex-col gap-4 items-center">
-          <p className="text-2xl sm:text-3xl font-bold">{title}</p>
-          <p className="text-sm sm:text-base">Author: Gemini</p>
-          <div className="relative w-[632px] h-[500px]">
-            <div
-              className="flex flex-row gap-4 items-center absolute left-0 transition-transform duration-700 ease-in-out"
-              style={{ transform: `translateX(-${curr_left_page * 316}px)` }}
-            >
-              {pages.map((page, index) => (
-                <div
-                  key={index}
-                  className={`h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden
+        {!pages.length ? (
+          // Show large logo when no content
+          <div className="flex flex-col items-center justify-center h-[500px] w-[632px]">
+            <img
+              src="/davinci_logo.png"
+              alt="DaVinci Logo"
+              className="h-48 w-auto mb-6 animate-fade-in"
+            />
+            <p className="text-xl text-gray-500">
+              Enter a prompt or upload files to begin
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 items-center">
+            <p className="text-2xl sm:text-3xl font-bold">{title}</p>
+            <p className="text-sm sm:text-base">Author: Gemini</p>
+            <div className="relative w-[632px] h-[500px]">
+              <div
+                className="flex flex-row gap-4 items-center absolute left-0 transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(-${curr_left_page * 316}px)` }}
+              >
+                {pages.map((page, index) => (
+                  <div
+                    key={index}
+                    className={`h-[500px] w-[300px] flex flex-col gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden
             transform transition-all duration-700 ease-in-out ${
               index === curr_left_page || index === curr_left_page + 1
                 ? "opacity-100 scale-100"
                 : "opacity-0 scale-95"
             }`}
-                >
-                  <p className="text-sm sm:text-base">{`Page ${index + 1}`}</p>
-                  {cardsLoading ? (
-                    <div className="flex-1 w-full animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                    </div>
-                  ) : (
-                    <div className="flex-1 overflow-y-auto transition-opacity duration-300">
-                      {pages[index]}
-                    </div>
-                  )}
-                  {allImageUrls && (
-                    <div className="w-full h-48 flex items-center justify-center transition-opacity duration-300">
-                      {allImageUrls[index] ? (
-                        imagesLoading[index] ? (
-                          <div className="w-full h-full rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
-                            <svg
-                              className="w-10 h-10 text-gray-300"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                              />
-                            </svg>
-                          </div>
-                        ) : (
-                          <img
-                            src={allImageUrls[index]}
-                            alt={`Page ${index + 1} Illustration`}
-                            className="max-w-full max-h-full object-contain rounded-lg shadow-lg transform transition-all duration-500"
-                            onLoad={() => {
-                              const newLoadingStates = [...imagesLoading];
-                              newLoadingStates[index] = false;
-                              setImagesLoading(newLoadingStates);
-                            }}
-                          />
-                        )
-                      ) : null}
-                    </div>
-                  )}
-                </div>
-              ))}
+                  >
+                    <p className="text-sm sm:text-base">{`Page ${index + 1}`}</p>
+                    {cardsLoading ? (
+                      <div className="flex-1 w-full animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                      </div>
+                    ) : (
+                      <div className="flex-1 overflow-y-auto transition-opacity duration-300">
+                        {pages[index]}
+                      </div>
+                    )}
+                    {allImageUrls && (
+                      <div className="w-full h-48 flex items-center justify-center transition-opacity duration-300">
+                        {allImageUrls[index] ? (
+                          imagesLoading[index] ? (
+                            <div className="w-full h-full rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                              <svg
+                                className="w-10 h-10 text-gray-300"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </div>
+                          ) : (
+                            <img
+                              src={allImageUrls[index]}
+                              alt={`Page ${index + 1} Illustration`}
+                              className="max-w-full max-h-full object-contain rounded-lg shadow-lg transform transition-all duration-500"
+                              onLoad={() => {
+                                const newLoadingStates = [...imagesLoading];
+                                newLoadingStates[index] = false;
+                                setImagesLoading(newLoadingStates);
+                              }}
+                            />
+                          )
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-row justify-between gap-4 mt-4">
+              <button
+                className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                onClick={() => handlePrevPage()}
+                disabled={curr_left_page <= 1}
+              >
+                &lt;
+              </button>
+              <button
+                className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                onClick={() => handleNextPage()}
+                disabled={curr_left_page >= pages.length - 2}
+              >
+                &gt;
+              </button>
             </div>
           </div>
-
-          <div className="flex flex-row justify-between gap-4 mt-4">
-            <button
-              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
-              onClick={() => handlePrevPage()}
-              disabled={curr_left_page <= 1}
-            >
-              &lt;
-            </button>
-            <button
-              className="bg-blue-500 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
-              onClick={() => handleNextPage()}
-              disabled={curr_left_page >= pages.length - 2}
-            >
-              &gt;
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Options Div */}
         <div className="h-[500] flex flex-col gap-4 place-content-center m-auto p-4 rounded-lg shadow-lg">
