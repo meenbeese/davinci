@@ -9,12 +9,27 @@ import { Card, CardContent } from "../components/card";
 import SubmitButton from "../components/submitButton";
 import "../app/globals.css";
 import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
+
 
 export default function Page3() {
+  const [error, setError] = useState("");
   const router = useRouter();
+  const { username, email, password } = router.query
   
-  const handleSubmit = () => {
-    router.push("/");
+  const handleSubmit = async () => {
+    // Handle sign-in
+    const res = await signIn("credentials", {
+      redirect: false,
+      email: email,
+      password: password,
+    });
+
+    if (res?.ok) {
+      router.push("/"); // Redirect to home page after successful login
+    } else {
+      setError("Invalid email or password");
+    }
   };
 
   // Education levels data - using state to manage selection
@@ -96,7 +111,7 @@ export default function Page3() {
                 <AvatarFallback className="bg-gradient-to-br from-gray-700 to-black text-white">KA</AvatarFallback>
               </Avatar>
               <h2 className="font-medium text-3xl text-white">
-                Khusan Akhmedov
+                {username}
               </h2>
             </div>
 

@@ -36,7 +36,7 @@ const LoadingOverlay = () => {
         setMessageIndex(prevIndex => (prevIndex + 1) % loadingMessages.length);
         setFadeState('in');
       }
-    }, 2500);
+    }, 1500);
     
     return () => clearInterval(fadeInterval);
   }, [fadeState]);

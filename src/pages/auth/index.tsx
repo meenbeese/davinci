@@ -35,7 +35,9 @@ export default function AuthPage() {
       });
 
       if (res.ok) {
-        router.push("/user_preferences"); // Redirect to home page after successful sign-up
+        // Redirect to home page after successful sign-up
+        setIsSignUp(false);
+        router.push({pathname: "/user_preferences", query: {username: formData.name, email: formData.email, password: formData.password}});
       } else {
         const data = await res.json();
         setError(data.message || "Something went wrong");
